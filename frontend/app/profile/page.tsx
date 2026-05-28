@@ -1,155 +1,64 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { getSkinProfile, submitQuiz } from '@/lib/api';
-import { isLoggedIn, removeToken } from '@/lib/auth';
 
-export default function ProfilePage() {
+export default function LandingPage() {
   const router = useRouter();
-  const [profile, setProfile] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
-  const [editing, setEditing] = useState(false);
-  const [saving, setSaving] = useState(false);
-  const [form, setForm] = useState<any>({});
-
-  useEffect(() => {
-    if (!isLoggedIn()) {
-      router.push('/login');
-      return;
-    }
-    loadProfile();
-  }, []);
-
-  const loadProfile = async () => {
-    try {
-      const res = await getSkinProfile();
-      setProfile(res.data);
-      setForm(res.data);
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleSave = async () => {
-    setSaving(true);
-    try {
-      await submitQuiz(form);
-      setProfile(form);
-      setEditing(false);
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  const handleLogout = () => {
-    removeToken();
-    router.push('/login');
-  };
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-rose-50 flex items-center justify-center">
-        <p className="text-gray-500">Loading profile...</p>
-      </div>
-    );
-  }
-
-  const fields = [
-    { key: 'age_range', label: 'Age Range' },
-    { key: 'gender', label: 'Gender' },
-    { key: 'skin_type', label: 'Skin Type' },
-    { key: 'products_used_before', label: 'Products Used Before' },
-    { key: 'sensitivity', label: 'Sensitivity' },
-    { key: 'sun_exposure', label: 'Sun Exposure' },
-    { key: 'concern_one', label: 'Main Concern' },
-    { key: 'concern_two', label: 'Secondary Concern' },
-    { key: 'skin_goal', label: 'Skin Goal' },
-  ];
 
   return (
     <div className="min-h-screen bg-rose-50">
-      {/* Header */}
       <div className="bg-white shadow-sm px-6 py-4 flex justify-between items-center">
-        <button onClick={() => router.push('/dashboard')} className="text-rose-500 font-medium text-sm">
-          ← Back
-        </button>
-        <h1 className="text-lg font-bold text-gray-800">Profile</h1>
+        <h1 className="text-xl font-bold text-rose-500">SkinCare AI</h1>
+        <div className="flex gap-3">
+          <button
+            onClick={() => router.push('/login')}
+            className="border border-rose-300 text-rose-500 px-4 py-2 rounded-lg text-sm font-medium hover:bg-rose-50 transition"
+          >
+            Sign In
+          </button>
+          <button
+            onClick={() => router.push('/register')}
+            className="bg-rose-500 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-rose-600 transition"
+          >
+            Get Started
+          </button>
+        </div>
+      </div>
+
+      <div className="max-w-4xl mx-auto px-6 py-20 text-center">
+        <h2 className="text-4xl font-bold text-gray-800 mb-4">
+          AI-Powered Skincare<br />
+          <span className="text-rose-500">Personalized For You</span>
+        </h2>
+        <p className="text-gray-500 text-lg mb-8 max-w-xl mx-auto">
+          Analyze your skin with advanced AI, get personalized recommendations based on your skin type, concerns, and today's weather.
+        </p>
         <button
-          onClick={handleLogout}
-          className="text-sm text-gray-500 hover:text-red-500 transition"
+          onClick={() => router.push('/register')}
+          className="bg-rose-500 text-white px-8 py-3 rounded-xl text-md font-medium hover:bg-rose-600 transition shadow-md"
         >
-          Logout
+          Start Free Analysis →
         </button>
       </div>
 
-      <div className="max-w-lg mx-auto px-6 py-8 space-y-6">
-
-        {/* Skin Profile */}
-        <div className="bg-white rounded-2xl p-6 shadow-sm">
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-md font-semibold text-gray-800">Skin Profile</h2>
-            <button
-              onClick={() => setEditing(!editing)}
-              className="text-sm text-rose-500 font-medium hover:underline"
-            >
-              {editing ? 'Cancel' : 'Edit'}
-            </button>
+      <div className="max-w-4xl mx-auto px-6 pb-20">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="bg-white rounded-2xl p-6 shadow-sm text-center">
+            <p className="text-4xl mb-3">📷</p>
+            <h3 className="font-semibold text-gray-800 mb-2">Skin Analysis</h3>
+            <p className="text-sm text-gray-500">Upload a photo and get instant AI analysis of acne, redness, texture and more.</p>
           </div>
-
-          <div className="space-y-3">
-            {fields.map(({ key, label }) => (
-              <div key={key} className="flex justify-between items-center border-b border-gray-100 pb-2">
-                <span className="text-sm text-gray-500">{label}</span>
-                {editing ? (
-                  <input
-                    value={form[key] || ''}
-                    onChange={(e) => setForm({ ...form, [key]: e.target.value })}
-                    className="text-sm text-gray-800 border border-gray-200 rounded-lg px-2 py-1 w-40 focus:outline-none focus:ring-1 focus:ring-rose-300"
-                  />
-                ) : (
-                  <span className="text-sm font-medium text-gray-800">
-                    {profile?.[key] || '—'}
-                  </span>
-                )}
-              </div>
-            ))}
+          <div className="bg-white rounded-2xl p-6 shadow-sm text-center">
+            <p className="text-4xl mb-3">🌤️</p>
+            <h3 className="font-semibold text-gray-800 mb-2">Weather-Aware</h3>
+            <p className="text-sm text-gray-500">Recommendations adapt to today's UV index, humidity and weather conditions.</p>
           </div>
-
-          {editing && (
-            <button
-              onClick={handleSave}
-              disabled={saving}
-              className="mt-4 w-full bg-rose-500 text-white rounded-lg py-2.5 text-sm font-medium hover:bg-rose-600 transition disabled:opacity-50"
-            >
-              {saving ? 'Saving...' : 'Save Changes'}
-            </button>
-          )}
-        </div>
-
-        {/* Quick Actions */}
-        <div className="bg-white rounded-2xl p-6 shadow-sm">
-          <h2 className="text-md font-semibold text-gray-800 mb-4">Quick Actions</h2>
-          <div className="space-y-3">
-            <button
-              onClick={() => router.push('/quiz')}
-              className="w-full text-left px-4 py-3 rounded-xl border border-gray-200 text-sm text-gray-700 hover:border-rose-200 transition"
-            >
-              🔄 Retake Quiz
-            </button>
-            <button
-              onClick={() => router.push('/scan')}
-              className="w-full text-left px-4 py-3 rounded-xl border border-gray-200 text-sm text-gray-700 hover:border-rose-200 transition"
-            >
-              📷 New Scan
-            </button>
+          <div className="bg-white rounded-2xl p-6 shadow-sm text-center">
+            <p className="text-4xl mb-3">📈</p>
+            <h3 className="font-semibold text-gray-800 mb-2">Track Progress</h3>
+            <p className="text-sm text-gray-500">Monitor your skin improvement over time with detailed progress charts.</p>
           </div>
         </div>
-
       </div>
     </div>
   );
