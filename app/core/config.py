@@ -10,6 +10,8 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
     OPENWEATHERMAP_API_KEY: str
     OPENUV_API_KEY: str
+    ANTHROPIC_API_KEY: str = ""
+    GROQ_API_KEY: str
 
     class Config:
         env_file = ".env"

@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from app.api.routes import auth, quiz, weather, scan
+from app.api.routes import auth, quiz, weather, scan, recommendation
 
 app = FastAPI(
     title="Skincare Analysis & Recommendation System",
@@ -10,6 +10,7 @@ app.include_router(auth.router)
 app.include_router(quiz.router)
 app.include_router(weather.router)
 app.include_router(scan.router)
+app.include_router(recommendation.router)
 
 @app.get("/")
 def root():
