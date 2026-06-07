@@ -4,13 +4,14 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { getRecommendation, getScanHistory } from '@/lib/api';
 import { isLoggedIn } from '@/lib/auth';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 
 export default function DashboardPage() {
   const router = useRouter();
   const [recommendation, setRecommendation] = useState<any>(null);
   const [scanHistory, setScanHistory] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState('overview');
 
   useEffect(() => {
     if (!isLoggedIn()) {
@@ -36,123 +37,222 @@ export default function DashboardPage() {
   };
 
   const chartData = scanHistory.map((scan: any, index: number) => ({
-    scan: `Scan ${index + 1}`,
-    acne: scan.acne_score,
-    redness: scan.redness_score,
-    texture: scan.texture_score,
+    scan: `#${index + 1}`,
+    Acne: Math.round(scan.acne_score * 100),
+    Redness: Math.round(scan.redness_score * 100),
+    Texture: Math.round(scan.texture_score * 100),
   }));
 
   if (loading) {
     return (
       <div className="min-h-screen bg-rose-50 flex items-center justify-center">
-        <p className="text-gray-500">Loading your skin data...</p>
+        <div className="text-center">
+          <div className="text-4xl mb-3">✨</div>
+          <p className="text-gray-500 text-sm">Loading your skin data...</p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-rose-50">
+    <div className="min-h-screen bg-gray-50">
+
       {/* Header */}
-      <div className="bg-white shadow-sm px-6 py-4 flex justify-between items-center">
-        <h1 className="text-xl font-bold text-rose-500">SkinCare AI</h1>
+      <div className="bg-white border-b border-gray-100 px-6 py-4 flex justify-between items-center sticky top-0 z-10">
+        <div className="flex items-center gap-2">
+          <span className="text-rose-500 text-xl font-bold">SkinCare AI</span>
+        </div>
         <div className="flex gap-3">
           <button
             onClick={() => router.push('/scan')}
-            className="bg-rose-500 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-rose-600 transition"
+            className="bg-rose-500 text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-rose-600 transition flex items-center gap-2"
           >
-            New Scan
+            📷 New Scan
           </button>
           <button
             onClick={() => router.push('/profile')}
-            className="border border-gray-200 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-50 transition"
+            className="border border-gray-200 px-4 py-2 rounded-xl text-sm font-medium hover:bg-gray-50 transition"
           >
             Profile
           </button>
         </div>
       </div>
 
-      <div className="max-w-4xl mx-auto px-6 py-8 space-y-6">
+      <div className="max-w-5xl mx-auto px-6 py-8">
 
-        {/* Welcome */}
-        <div className="bg-white rounded-2xl p-6 shadow-sm">
-          <h2 className="text-lg font-semibold text-gray-800">Welcome back 👋</h2>
-          <p className="text-gray-500 text-sm mt-1">
-            {scanHistory.length > 0
-              ? `You have ${scanHistory.length} scan${scanHistory.length > 1 ? 's' : ''} recorded.`
-              : 'No scans yet. Start your first scan!'}
-          </p>
+        {/* Stats Row */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+          <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
+            <p className="text-xs text-gray-400 mb-1">Total Scans</p>
+            <p className="text-2xl font-bold text-gray-800">{scanHistory.length}</p>
+          </div>
+          <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
+            <p className="text-xs text-gray-400 mb-1">Last Acne Score</p>
+            <p className="text-2xl font-bold text-rose-500">
+              {scanHistory.length > 0 ? `${Math.round(scanHistory[0].acne_score * 100)}%` : '—'}
+            </p>
+          </div>
+          <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
+            <p className="text-xs text-gray-400 mb-1">Recommended SPF</p>
+            <p className="text-2xl font-bold text-orange-500">
+              {recommendation?.recommended_spf || '—'}
+            </p>
+          </div>
+          <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
+            <p className="text-xs text-gray-400 mb-1">Ingredients</p>
+            <p className="text-2xl font-bold text-purple-500">
+              {recommendation?.ingredients?.length || '—'}
+            </p>
+          </div>
         </div>
 
-        {/* Latest Recommendation */}
-        {recommendation && (
-          <div className="bg-white rounded-2xl p-6 shadow-sm">
-            <h3 className="text-md font-semibold text-gray-800 mb-4">Latest Skin Report</h3>
-            <p className="text-gray-600 text-sm leading-relaxed">{recommendation.skin_report}</p>
+        {/* Tabs */}
+        <div className="flex gap-2 mb-6">
+          {['overview', 'progress', 'history'].map((tab) => (
+            <button
+              key={tab}
+              onClick={() => setActiveTab(tab)}
+              className={`px-4 py-2 rounded-xl text-sm font-medium capitalize transition ${
+                activeTab === tab
+                  ? 'bg-rose-500 text-white'
+                  : 'bg-white text-gray-600 border border-gray-200 hover:border-rose-200'
+              }`}
+            >
+              {tab}
+            </button>
+          ))}
+        </div>
 
-            <div className="mt-4 grid grid-cols-2 gap-4">
-              <div className="bg-rose-50 rounded-xl p-4">
-                <p className="text-xs font-medium text-rose-500 mb-2">☀️ Morning Routine</p>
-                {recommendation.morning_routine.map((step: string, i: number) => (
-                  <p key={i} className="text-sm text-gray-700">{i + 1}. {step}</p>
-                ))}
-              </div>
-              <div className="bg-gray-50 rounded-xl p-4">
-                <p className="text-xs font-medium text-gray-500 mb-2">🌙 Night Routine</p>
-                {recommendation.night_routine.map((step: string, i: number) => (
-                  <p key={i} className="text-sm text-gray-700">{i + 1}. {step}</p>
-                ))}
-              </div>
-            </div>
-
-            <div className="mt-4">
-              <p className="text-xs font-medium text-gray-500 mb-2">Recommended Ingredients</p>
-              <div className="flex flex-wrap gap-2">
-                {recommendation.ingredients.map((ing: string, i: number) => (
-                  <span key={i} className="bg-rose-100 text-rose-600 text-xs px-3 py-1 rounded-full">
-                    {ing}
-                  </span>
-                ))}
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Progress Chart */}
-        {chartData.length > 1 && (
-          <div className="bg-white rounded-2xl p-6 shadow-sm">
-            <h3 className="text-md font-semibold text-gray-800 mb-4">Skin Progress</h3>
-            <ResponsiveContainer width="100%" height={200}>
-              <LineChart data={chartData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="scan" />
-                <YAxis domain={[0, 1]} />
-                <Tooltip />
-                <Line type="monotone" dataKey="acne" stroke="#f43f5e" name="Acne" />
-                <Line type="monotone" dataKey="redness" stroke="#fb923c" name="Redness" />
-                <Line type="monotone" dataKey="texture" stroke="#a78bfa" name="Texture" />
-              </LineChart>
-            </ResponsiveContainer>
-          </div>
-        )}
-
-        {/* Scan History */}
-        {scanHistory.length > 0 && (
-          <div className="bg-white rounded-2xl p-6 shadow-sm">
-            <h3 className="text-md font-semibold text-gray-800 mb-4">Scan History</h3>
-            <div className="space-y-3">
-              {scanHistory.map((scan: any, i: number) => (
-                <div key={i} className="flex justify-between items-center border-b border-gray-100 pb-3">
-                  <div>
-                    <p className="text-sm font-medium text-gray-700">Scan {i + 1}</p>
-                    <p className="text-xs text-gray-400">{new Date(scan.created_at).toLocaleDateString()}</p>
+        {/* Overview Tab */}
+        {activeTab === 'overview' && (
+          <div className="space-y-6">
+            {recommendation ? (
+              <>
+                {/* Skin Report */}
+                <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+                  <div className="flex items-center gap-2 mb-4">
+                    <span className="text-lg">🔍</span>
+                    <h3 className="font-semibold text-gray-800">Your Skin Report</h3>
                   </div>
-                  <div className="text-right">
-                    <p className="text-xs text-gray-500">Acne: {(scan.acne_score * 100).toFixed(0)}%</p>
-                    <p className="text-xs text-gray-500">Redness: {(scan.redness_score * 100).toFixed(0)}%</p>
+                  <p className="text-gray-600 text-sm leading-relaxed">{recommendation.skin_report}</p>
+                </div>
+
+                {/* Routines */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="bg-gradient-to-br from-amber-50 to-orange-50 rounded-2xl p-6 border border-orange-100">
+                    <p className="text-sm font-semibold text-orange-600 mb-3">☀️ Morning Routine</p>
+                    <div className="space-y-2">
+                      {recommendation.morning_routine.map((step: string, i: number) => (
+                        <div key={i} className="flex items-center gap-3 bg-white rounded-xl px-3 py-2">
+                          <span className="w-5 h-5 bg-orange-100 text-orange-600 rounded-full text-xs flex items-center justify-center font-bold">{i + 1}</span>
+                          <span className="text-sm text-gray-700">{step}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="bg-gradient-to-br from-indigo-50 to-purple-50 rounded-2xl p-6 border border-purple-100">
+                    <p className="text-sm font-semibold text-purple-600 mb-3">🌙 Night Routine</p>
+                    <div className="space-y-2">
+                      {recommendation.night_routine.map((step: string, i: number) => (
+                        <div key={i} className="flex items-center gap-3 bg-white rounded-xl px-3 py-2">
+                          <span className="w-5 h-5 bg-purple-100 text-purple-600 rounded-full text-xs flex items-center justify-center font-bold">{i + 1}</span>
+                          <span className="text-sm text-gray-700">{step}</span>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 </div>
-              ))}
-            </div>
+
+                {/* Ingredients */}
+                <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+                  <div className="flex items-center gap-2 mb-4">
+                    <span className="text-lg">🧴</span>
+                    <h3 className="font-semibold text-gray-800">Recommended Ingredients</h3>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {recommendation.ingredients.map((ing: string, i: number) => (
+                      <span key={i} className="bg-rose-50 text-rose-600 border border-rose-100 text-xs px-3 py-1.5 rounded-full font-medium">
+                        {ing}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              </>
+            ) : (
+              <div className="bg-white rounded-2xl p-12 shadow-sm border border-gray-100 text-center">
+                <p className="text-4xl mb-3">📷</p>
+                <h3 className="font-semibold text-gray-800 mb-2">No scan yet</h3>
+                <p className="text-gray-500 text-sm mb-4">Complete the quiz and do your first scan to get personalized recommendations.</p>
+                <button
+                  onClick={() => router.push('/quiz')}
+                  className="bg-rose-500 text-white px-6 py-2.5 rounded-xl text-sm font-medium hover:bg-rose-600 transition"
+                >
+                  Start Quiz →
+                </button>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Progress Tab */}
+        {activeTab === 'progress' && (
+          <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+            <h3 className="font-semibold text-gray-800 mb-6">Skin Progress Over Time</h3>
+            {chartData.length > 1 ? (
+              <ResponsiveContainer width="100%" height={300}>
+                <LineChart data={chartData}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                  <XAxis dataKey="scan" tick={{ fontSize: 12 }} />
+                  <YAxis domain={[0, 100]} tick={{ fontSize: 12 }} unit="%" />
+                  <Tooltip formatter={(value) => `${value}%`} />
+                  <Legend />
+                  <Line type="monotone" dataKey="Acne" stroke="#f43f5e" strokeWidth={2} dot={{ r: 4 }} />
+                  <Line type="monotone" dataKey="Redness" stroke="#fb923c" strokeWidth={2} dot={{ r: 4 }} />
+                  <Line type="monotone" dataKey="Texture" stroke="#a78bfa" strokeWidth={2} dot={{ r: 4 }} />
+                </LineChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="text-center py-12">
+                <p className="text-gray-400 text-sm">Do at least 2 scans to see your progress chart.</p>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* History Tab */}
+        {activeTab === 'history' && (
+          <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+            <h3 className="font-semibold text-gray-800 mb-4">Scan History</h3>
+            {scanHistory.length > 0 ? (
+              <div className="space-y-3">
+                {scanHistory.map((scan: any, i: number) => (
+                  <div key={i} className="flex justify-between items-center p-4 rounded-xl border border-gray-100 hover:border-rose-100 transition">
+                    <div>
+                      <p className="text-sm font-medium text-gray-800">Scan #{scanHistory.length - i}</p>
+                      <p className="text-xs text-gray-400 mt-0.5">{new Date(scan.created_at).toLocaleDateString('en-US', { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' })}</p>
+                    </div>
+                    <div className="flex gap-4 text-right">
+                      <div>
+                        <p className="text-xs text-gray-400">Acne</p>
+                        <p className="text-sm font-semibold text-rose-500">{Math.round(scan.acne_score * 100)}%</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-gray-400">Redness</p>
+                        <p className="text-sm font-semibold text-orange-500">{Math.round(scan.redness_score * 100)}%</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-gray-400">Texture</p>
+                        <p className="text-sm font-semibold text-purple-500">{Math.round(scan.texture_score * 100)}%</p>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-12">
+                <p className="text-gray-400 text-sm">No scans yet.</p>
+              </div>
+            )}
           </div>
         )}
 
