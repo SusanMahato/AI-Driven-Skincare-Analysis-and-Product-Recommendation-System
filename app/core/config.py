@@ -13,6 +13,8 @@ class Settings(BaseSettings):
     ANTHROPIC_API_KEY: str = ""
     GROQ_API_KEY: str
     RESEND_API_KEY: str
+    GOOGLE_CLIENT_ID: str
+    GOOGLE_CLIENT_SECRET: str
 
     class Config:
         env_file = ".env"

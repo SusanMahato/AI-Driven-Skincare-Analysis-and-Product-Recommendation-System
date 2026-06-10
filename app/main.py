@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.api.routes import auth, quiz, weather, scan, recommendation
+from app.api.routes import auth, quiz, weather, scan, recommendation, oauth
 
 app = FastAPI(
     title="Skincare Analysis & Recommendation System",
@@ -20,6 +20,7 @@ app.include_router(quiz.router)
 app.include_router(weather.router)
 app.include_router(scan.router)
 app.include_router(recommendation.router)
+app.include_router(oauth.router)
 
 @app.get("/")
 def root():
