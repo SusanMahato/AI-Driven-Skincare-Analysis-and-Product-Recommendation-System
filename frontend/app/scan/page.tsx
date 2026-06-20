@@ -61,7 +61,7 @@ export default function ScanPage() {
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <div className="bg-white border-b border-gray-100 px-6 py-4 flex justify-between items-center sticky top-0 z-10">
-        <button onClick={() => router.push('/dashboard')} className="text-rose-500 font-medium text-sm flex items-center gap-1">
+        <button onClick={() => router.push('/dashboard')} className="text-rose-500 font-medium text-sm flex items-center gap-1 cursor-pointer">
           ← Back
         </button>
         <h1 className="text-lg font-bold text-gray-800">Skin Analysis</h1>

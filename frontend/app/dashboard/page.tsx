@@ -39,12 +39,24 @@ export default function DashboardPage() {
     }
   };
 
-  const chartData = scanHistory.map((scan: any, index: number) => ({
+ const chartData = [...scanHistory].reverse().map((scan: any, index: number) => ({
     scan: `#${index + 1}`,
+    date: new Date(scan.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
     Acne: Math.round(scan.acne_score * 100),
     Redness: Math.round(scan.redness_score * 100),
     Texture: Math.round(scan.texture_score * 100),
+    'Dark Spots': Math.round(scan.dark_spots_score * 100),
+    Pores: Math.round(scan.pores_score * 100),
+    'Dark Circles': Math.round(scan.dark_circles_score * 100),
   }));
+
+  const getImprovement = (key: string) => {
+    if (scanHistory.length < 2) return null;
+    const first = scanHistory[scanHistory.length - 1][key];
+    const latest = scanHistory[0][key];
+    const diff = Math.round((latest - first) * 100);
+    return diff;
+  };
 
   if (loading) {
     return (
@@ -205,23 +217,71 @@ export default function DashboardPage() {
 
         {/* Progress Tab */}
         {activeTab === 'progress' && (
-          <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-            <h3 className="font-semibold text-gray-800 mb-6">Skin Progress Over Time</h3>
+          <div className="space-y-6">
             {chartData.length > 1 ? (
-              <ResponsiveContainer width="100%" height={300}>
-                <LineChart data={chartData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                  <XAxis dataKey="scan" tick={{ fontSize: 12 }} />
-                  <YAxis domain={[0, 100]} tick={{ fontSize: 12 }} unit="%" />
-                  <Tooltip formatter={(value) => `${value}%`} />
-                  <Legend />
-                  <Line type="monotone" dataKey="Acne" stroke="#f43f5e" strokeWidth={2} dot={{ r: 4 }} />
-                  <Line type="monotone" dataKey="Redness" stroke="#fb923c" strokeWidth={2} dot={{ r: 4 }} />
-                  <Line type="monotone" dataKey="Texture" stroke="#a78bfa" strokeWidth={2} dot={{ r: 4 }} />
-                </LineChart>
-              </ResponsiveContainer>
+              <>
+                {/* Improvement Summary */}
+                <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+                  <h3 className="font-semibold text-gray-800 mb-4">Change Since First Scan</h3>
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                    {[
+                      { label: 'Acne', key: 'acne_score', color: 'text-rose-500' },
+                      { label: 'Redness', key: 'redness_score', color: 'text-orange-500' },
+                      { label: 'Texture', key: 'texture_score', color: 'text-purple-500' },
+                      { label: 'Dark Spots', key: 'dark_spots_score', color: 'text-amber-600' },
+                      { label: 'Pores', key: 'pores_score', color: 'text-blue-500' },
+                      { label: 'Dark Circles', key: 'dark_circles_score', color: 'text-indigo-500' },
+                    ].map(({ label, key, color }) => {
+                      const change = getImprovement(key);
+                      const improved = change !== null && change < 0;
+                      const worsened = change !== null && change > 0;
+                      return (
+                        <div key={key} className="bg-gray-50 rounded-xl p-3 border border-gray-100">
+                          <p className="text-xs text-gray-400">{label}</p>
+                          <div className="flex items-center gap-1.5 mt-1">
+                            <p className={`text-lg font-bold ${color}`}>
+                              {change !== null ? `${change > 0 ? '+' : ''}${change}%` : '—'}
+                            </p>
+                            {improved && <span className="text-green-500 text-xs">↓ improved</span>}
+                            {worsened && <span className="text-red-400 text-xs">↑ worsened</span>}
+                            {change === 0 && <span className="text-gray-400 text-xs">no change</span>}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+
+               {/* Small Multiples Charts */}
+                <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+                  <h3 className="font-semibold text-gray-800 mb-2">Skin Progress Over Time</h3>
+                  <p className="text-xs text-gray-400 mb-6">Lower is better — a downward trend means improvement</p>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {[
+                      { key: 'Acne', color: '#dc2626' },
+                      { key: 'Redness', color: '#ea580c' },
+                      { key: 'Texture', color: '#9333ea' },
+                      { key: 'Dark Spots', color: '#16a34a' },
+                      { key: 'Pores', color: '#2563eb' },
+                      { key: 'Dark Circles', color: '#db2777' },
+                    ].map(({ key, color }) => (
+                      <div key={key} className="border border-gray-100 rounded-xl p-4">
+                        <p className="text-sm font-medium text-gray-700 mb-2">{key}</p>
+                        <ResponsiveContainer width="100%" height={140}>
+                          <LineChart data={chartData}>
+                            <CartesianGrid strokeDasharray="3 3" stroke="#f5f5f5" />
+                            <XAxis dataKey="date" tick={{ fontSize: 10 }} />
+                            <YAxis domain={[0, 100]} tick={{ fontSize: 10 }} unit="%" width={35} />
+                            <Tooltip formatter={(value) => `${value}%`} />
+                            <Line type="monotone" dataKey={key} stroke={color} strokeWidth={2} dot={{ r: 3 }} />
+                          </LineChart>
+                        </ResponsiveContainer>
+                      </div>
+                    ))}
+                  </div>
+                </div>    </>
             ) : (
-              <div className="text-center py-12">
+              <div className="bg-white rounded-2xl p-12 shadow-sm border border-gray-100 text-center">
                 <p className="text-gray-400 text-sm">Do at least 2 scans to see your progress chart.</p>
               </div>
             )}
