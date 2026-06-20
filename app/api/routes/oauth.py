@@ -28,7 +28,11 @@ def google_login():
     return RedirectResponse(f"{GOOGLE_AUTH_URL}?{query}")
 
 @router.get("/google/callback")
-async def google_callback(code: str, db: Session = Depends(get_db)):
+async def google_callback(code: str = None, error: str = None, db: Session = Depends(get_db)):
+    # Handle user cancellation or denial
+    if error or not code:
+        return RedirectResponse("http://localhost:3000/login")
+    
     async with httpx.AsyncClient() as client:
         # Exchange code for token
         token_response = await client.post(GOOGLE_TOKEN_URL, data={
@@ -42,7 +46,7 @@ async def google_callback(code: str, db: Session = Depends(get_db)):
         access_token = token_data.get("access_token")
 
         if not access_token:
-            raise HTTPException(status_code=400, detail="Failed to get access token")
+            return RedirectResponse("http://localhost:3000/login")
 
         # Get user info
         user_response = await client.get(
@@ -56,7 +60,7 @@ async def google_callback(code: str, db: Session = Depends(get_db)):
     google_id = user_info.get("id")
 
     if not email:
-        raise HTTPException(status_code=400, detail="Could not get email from Google")
+        return RedirectResponse("http://localhost:3000/login")
 
     # Find or create user
     user = get_user_by_email(db, email)
@@ -77,6 +81,15 @@ async def google_callback(code: str, db: Session = Depends(get_db)):
     jwt_token = create_access_token(data={"sub": user.email})
     
     # Redirect to frontend with token
+    # Check if user has completed quiz
+    from app.services.quiz_service import get_skin_profile
+    skin_profile = get_skin_profile(db, user.id)
+    
+    if skin_profile:
+        redirect_to = "dashboard"
+    else:
+        redirect_to = "quiz"
+    
     return RedirectResponse(
-        f"http://localhost:3000/auth/callback?token={jwt_token}"
+        f"http://localhost:3000/auth/callback?token={jwt_token}&redirect={redirect_to}"
     )

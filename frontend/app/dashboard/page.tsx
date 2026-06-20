@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { getRecommendation, getScanHistory } from '@/lib/api';
-import { isLoggedIn } from '@/lib/auth';
+import { isLoggedIn, removeToken } from '@/lib/auth';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 
 export default function DashboardPage() {
@@ -12,13 +12,16 @@ export default function DashboardPage() {
   const [scanHistory, setScanHistory] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('overview');
+  const [selectedScan, setSelectedScan] = useState<any>(null);
 
   useEffect(() => {
-    if (!isLoggedIn()) {
-      router.push('/login');
-      return;
+    if (typeof window !== 'undefined') {
+      if (!isLoggedIn()) {
+        router.push('/login');
+        return;
+      }
+      loadData();
     }
-    loadData();
   }, []);
 
   const loadData = async () => {
@@ -65,15 +68,21 @@ export default function DashboardPage() {
         <div className="flex gap-3">
           <button
             onClick={() => router.push('/scan')}
-            className="bg-rose-500 text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-rose-600 transition flex items-center gap-2"
+            className="bg-rose-500 text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-rose-600 transition flex items-center gap-2 cursor-pointer"
           >
             📷 New Scan
           </button>
           <button
             onClick={() => router.push('/profile')}
-            className="border border-gray-200 px-4 py-2 rounded-xl text-sm font-medium hover:bg-gray-50 transition"
+            className="border border-gray-200 px-4 py-2 rounded-xl text-sm font-medium hover:bg-gray-50 transition cursor-pointer"
           >
             Profile
+          </button>
+          <button
+            onClick={() => { removeToken(); router.push('/login'); }}
+            className="border border-red-200 text-red-500 px-4 py-2 rounded-xl text-sm font-medium hover:bg-red-50 transition cursor-pointer"
+          >
+            Logout
           </button>
         </div>
       </div>
@@ -112,7 +121,7 @@ export default function DashboardPage() {
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
-              className={`px-4 py-2 rounded-xl text-sm font-medium capitalize transition ${
+              className={`px-4 py-2 rounded-xl text-sm font-medium capitalize transition cursor-pointer ${
                 activeTab === tab
                   ? 'bg-rose-500 text-white'
                   : 'bg-white text-gray-600 border border-gray-200 hover:border-rose-200'
@@ -185,7 +194,7 @@ export default function DashboardPage() {
                 <p className="text-gray-500 text-sm mb-4">Complete the quiz and do your first scan to get personalized recommendations.</p>
                 <button
                   onClick={() => router.push('/quiz')}
-                  className="bg-rose-500 text-white px-6 py-2.5 rounded-xl text-sm font-medium hover:bg-rose-600 transition"
+                  className="bg-rose-500 text-white px-6 py-2.5 rounded-xl text-sm font-medium hover:bg-rose-600 transition cursor-pointer"
                 >
                   Start Quiz →
                 </button>
@@ -226,26 +235,28 @@ export default function DashboardPage() {
             {scanHistory.length > 0 ? (
               <div className="space-y-3">
                 {scanHistory.map((scan: any, i: number) => (
-                  <div key={i} className="flex justify-between items-center p-4 rounded-xl border border-gray-100 hover:border-rose-100 transition">
-                    <div>
+                  <button
+                    key={i}
+                    onClick={() => setSelectedScan(scan)}
+                    className="w-full flex items-center gap-4 p-4 rounded-xl border border-gray-100 hover:border-rose-200 hover:bg-rose-50/30 transition text-left cursor-pointer"
+                  >
+                    {scan.photo_url ? (
+                      <img
+                        src={`http://127.0.0.1:8000${scan.photo_url}`}
+                        alt="Scan"
+                        className="w-14 h-14 object-cover rounded-lg border border-gray-200 flex-shrink-0"
+                      />
+                    ) : (
+                      <div className="w-14 h-14 rounded-lg border border-gray-200 bg-gray-50 flex items-center justify-center flex-shrink-0 text-xl">
+                        📷
+                      </div>
+                    )}
+                    <div className="flex-1">
                       <p className="text-sm font-medium text-gray-800">Scan #{scanHistory.length - i}</p>
                       <p className="text-xs text-gray-400 mt-0.5">{new Date(scan.created_at).toLocaleDateString('en-US', { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' })}</p>
                     </div>
-                    <div className="flex gap-4 text-right">
-                      <div>
-                        <p className="text-xs text-gray-400">Acne</p>
-                        <p className="text-sm font-semibold text-rose-500">{Math.round(scan.acne_score * 100)}%</p>
-                      </div>
-                      <div>
-                        <p className="text-xs text-gray-400">Redness</p>
-                        <p className="text-sm font-semibold text-orange-500">{Math.round(scan.redness_score * 100)}%</p>
-                      </div>
-                      <div>
-                        <p className="text-xs text-gray-400">Texture</p>
-                        <p className="text-sm font-semibold text-purple-500">{Math.round(scan.texture_score * 100)}%</p>
-                      </div>
-                    </div>
-                  </div>
+                    <span className="text-gray-300 text-lg">›</span>
+                  </button>
                 ))}
               </div>
             ) : (
@@ -253,6 +264,71 @@ export default function DashboardPage() {
                 <p className="text-gray-400 text-sm">No scans yet.</p>
               </div>
             )}
+          </div>
+        )}
+
+        {/* Scan Detail Modal */}
+        {selectedScan && (
+          <div
+            className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 px-4"
+            onClick={() => setSelectedScan(null)}
+          >
+            <div
+              className="bg-white rounded-2xl max-w-md w-full p-6 max-h-[90vh] overflow-y-auto"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="font-semibold text-gray-800">
+                  Scan Details — {new Date(selectedScan.created_at).toLocaleDateString('en-US', { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' })}
+                </h3>
+                <button onClick={() => setSelectedScan(null)} className="text-gray-400 hover:text-gray-600 text-xl cursor-pointer">✕</button>
+              </div>
+
+              {selectedScan.photo_url ? (
+                <img
+                  src={`http://127.0.0.1:8000${selectedScan.photo_url}`}
+                  alt="Scan"
+                  className="w-full max-h-80 object-contain rounded-xl border border-gray-200 mb-4 bg-gray-50"
+                />
+              ) : (
+                <div className="w-full h-40 rounded-xl border border-gray-200 bg-gray-50 flex items-center justify-center mb-4 text-4xl">
+                  📷
+                </div>
+              )}
+
+              <div className="grid grid-cols-2 gap-3">
+                <div className="bg-gray-50 rounded-lg p-3">
+                  <p className="text-xs text-gray-400">Acne</p>
+                  <p className="text-lg font-bold text-rose-500">{Math.round(selectedScan.acne_score * 100)}%</p>
+                </div>
+                <div className="bg-gray-50 rounded-lg p-3">
+                  <p className="text-xs text-gray-400">Redness</p>
+                  <p className="text-lg font-bold text-orange-500">{Math.round(selectedScan.redness_score * 100)}%</p>
+                </div>
+                <div className="bg-gray-50 rounded-lg p-3">
+                  <p className="text-xs text-gray-400">Texture</p>
+                  <p className="text-lg font-bold text-purple-500">{Math.round(selectedScan.texture_score * 100)}%</p>
+                </div>
+                <div className="bg-gray-50 rounded-lg p-3">
+                  <p className="text-xs text-gray-400">Dark Spots</p>
+                  <p className="text-lg font-bold text-amber-600">{Math.round(selectedScan.dark_spots_score * 100)}%</p>
+                </div>
+                <div className="bg-gray-50 rounded-lg p-3">
+                  <p className="text-xs text-gray-400">Pores</p>
+                  <p className="text-lg font-bold text-blue-500">{Math.round(selectedScan.pores_score * 100)}%</p>
+                </div>
+                <div className="bg-gray-50 rounded-lg p-3">
+                  <p className="text-xs text-gray-400">Dark Circles</p>
+                  <p className="text-lg font-bold text-indigo-500">{Math.round(selectedScan.dark_circles_score * 100)}%</p>
+                </div>
+              </div>
+
+              {selectedScan.weather_condition && (
+                <div className="mt-4 bg-rose-50 rounded-lg p-3 text-xs text-gray-600">
+                  Weather: {selectedScan.weather_condition} · {selectedScan.temperature}°C · UV {selectedScan.uv_index}
+                </div>
+              )}
+            </div>
           </div>
         )}
 

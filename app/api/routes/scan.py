@@ -6,8 +6,13 @@ from app.models.user import User
 from app.models.scan import Scan
 from app.services.cv_service import analyze_skin, check_photo_quality
 from app.services.weather_service import get_full_weather
+import os
+import uuid
 
 router = APIRouter(prefix="/scan", tags=["Scan"])
+
+UPLOAD_DIR = os.path.join(os.path.dirname(__file__), '..', '..', '..', 'uploaded_scans')
+os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 @router.post("/analyze")
 async def analyze(
@@ -27,6 +32,14 @@ async def analyze(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=quality["issues"]
         )
+
+    # Save the photo to disk
+    file_extension = os.path.splitext(file.filename)[1] or ".jpg"
+    unique_filename = f"{current_user.id}_{uuid.uuid4().hex}{file_extension}"
+    file_path = os.path.join(UPLOAD_DIR, unique_filename)
+    with open(file_path, "wb") as f:
+        f.write(image_bytes)
+    photo_url = f"/uploaded_scans/{unique_filename}"
 
     # Run CV analysis
     cv_scores = analyze_skin(image_bytes)
@@ -48,6 +61,7 @@ async def analyze(
     scan = Scan(
         user_id=current_user.id,
         scan_type="full",
+        photo_url=photo_url,
         acne_score=cv_scores["acne_score"],
         redness_score=cv_scores["redness_score"],
         texture_score=cv_scores["texture_score"],
@@ -67,7 +81,8 @@ async def analyze(
     return {
         "scan_id": scan.id,
         "cv_scores": cv_scores,
-        "weather": weather
+        "weather": weather,
+        "photo_url": photo_url
     }
 
 @router.get("/history")

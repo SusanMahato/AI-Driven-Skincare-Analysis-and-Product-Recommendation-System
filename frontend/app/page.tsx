@@ -14,13 +14,13 @@ export default function LandingPage() {
         <div className="flex gap-3">
           <button
             onClick={() => router.push('/login')}
-            className="border border-gray-200 text-gray-700 px-4 py-2 rounded-xl text-sm font-medium hover:bg-gray-50 transition"
+            className="border border-gray-200 text-gray-700 px-4 py-2 rounded-xl text-sm font-medium hover:bg-gray-50 transition cursor-pointer"
           >
             Sign In
           </button>
           <button
             onClick={() => router.push('/register')}
-            className="bg-rose-500 text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-rose-600 transition"
+            className="bg-rose-500 text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-rose-600 transition cursor-pointer"
           >
             Get Started Free
           </button>
@@ -42,13 +42,13 @@ export default function LandingPage() {
         <div className="flex gap-4 justify-center flex-wrap">
           <button
             onClick={() => router.push('/register')}
-            className="bg-rose-500 text-white px-8 py-4 rounded-xl text-md font-semibold hover:bg-rose-600 transition shadow-lg shadow-rose-200"
+            className="bg-rose-500 text-white px-8 py-4 rounded-xl text-md font-semibold hover:bg-rose-600 transition shadow-lg shadow-rose-200 cursor-pointer"
           >
             Start Free Analysis →
           </button>
           <button
             onClick={() => router.push('/login')}
-            className="border border-gray-200 text-gray-700 px-8 py-4 rounded-xl text-md font-semibold hover:bg-gray-50 transition"
+            className="border border-gray-200 text-gray-700 px-8 py-4 rounded-xl text-md font-semibold hover:bg-gray-50 transition cursor-pointer"
           >
             Sign In
           </button>
@@ -113,7 +113,7 @@ export default function LandingPage() {
           <p className="text-rose-100 text-lg mb-8">Join and get your personalized skincare routine in minutes.</p>
           <button
             onClick={() => router.push('/register')}
-            className="bg-white text-rose-500 px-8 py-4 rounded-xl text-md font-bold hover:bg-rose-50 transition shadow-lg"
+            className="bg-white text-rose-500 px-8 py-4 rounded-xl text-md font-bold hover:bg-rose-50 transition shadow-lg cursor-pointer"
           >
             Get Started Free →
           </button>

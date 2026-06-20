@@ -1,6 +1,8 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from app.api.routes import auth, quiz, weather, scan, recommendation, oauth
+import os
 
 app = FastAPI(
     title="Skincare Analysis & Recommendation System",
@@ -14,6 +16,10 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+UPLOAD_DIR = os.path.join(os.path.dirname(__file__), '..', 'uploaded_scans')
+os.makedirs(UPLOAD_DIR, exist_ok=True)
+app.mount("/uploaded_scans", StaticFiles(directory=UPLOAD_DIR), name="uploaded_scans")
 
 app.include_router(auth.router)
 app.include_router(quiz.router)

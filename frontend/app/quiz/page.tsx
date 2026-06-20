@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { submitQuiz } from '@/lib/api';
 import { isLoggedIn } from '@/lib/auth';
 
@@ -52,10 +52,13 @@ const questions = [
 
 export default function QuizPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [current, setCurrent] = useState(0);
   const [answers, setAnswers] = useState<any>({});
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+
+  const backPath = searchParams.get('back') || '/dashboard';
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -99,7 +102,10 @@ export default function QuizPage() {
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <div className="bg-white border-b border-gray-100 px-6 py-4 flex justify-between items-center">
-        <button onClick={() => router.push('/dashboard')} className="text-rose-500 font-medium text-sm">
+        <button
+          onClick={() => router.push(backPath)}
+          className="text-rose-500 font-medium text-sm"
+        >
           ← Exit
         </button>
         <p className="text-sm text-gray-500">Skin Quiz</p>

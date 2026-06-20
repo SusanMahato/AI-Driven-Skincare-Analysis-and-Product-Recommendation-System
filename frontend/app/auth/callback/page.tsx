@@ -11,9 +11,10 @@ function CallbackContent() {
 
   useEffect(() => {
     const token = searchParams.get('token');
+    const redirect = searchParams.get('redirect') || 'dashboard';
     if (token) {
       saveToken(token);
-      router.push('/dashboard');
+      router.push(`/${redirect}`);
     } else {
       router.push('/login');
     }

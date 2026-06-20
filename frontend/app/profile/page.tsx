@@ -48,11 +48,6 @@ export default function ProfilePage() {
     }
   };
 
-  const handleLogout = () => {
-    removeToken();
-    router.push('/login');
-  };
-
   if (loading) {
     return (
       <div className="min-h-screen bg-rose-50 flex items-center justify-center">
@@ -75,21 +70,18 @@ export default function ProfilePage() {
 
   return (
     <div className="min-h-screen bg-rose-50">
-      <div className="bg-white shadow-sm px-6 py-4 flex justify-between items-center">
-        <button onClick={() => router.push('/dashboard')} className="text-rose-500 font-medium text-sm">
+      <div className="bg-white shadow-sm px-6 py-4 flex items-center">
+        <button onClick={() => router.push('/dashboard')} className="text-rose-500 font-medium text-sm cursor-pointer">
           ← Back
         </button>
-        <h1 className="text-lg font-bold text-gray-800">Profile</h1>
-        <button onClick={handleLogout} className="text-sm text-gray-500 hover:text-red-500 transition">
-          Logout
-        </button>
+        <h1 className="text-lg font-bold text-gray-800 absolute left-1/2 -translate-x-1/2">Profile</h1>
       </div>
 
       <div className="max-w-lg mx-auto px-6 py-8 space-y-6">
         <div className="bg-white rounded-2xl p-6 shadow-sm">
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-md font-semibold text-gray-800">Skin Profile</h2>
-            <button onClick={() => setEditing(!editing)} className="text-sm text-rose-500 font-medium hover:underline">
+            <button onClick={() => setEditing(!editing)} className="text-sm text-rose-500 font-medium hover:underline cursor-pointer">
               {editing ? 'Cancel' : 'Edit'}
             </button>
           </div>
@@ -113,7 +105,7 @@ export default function ProfilePage() {
             <button
               onClick={handleSave}
               disabled={saving}
-              className="mt-4 w-full bg-rose-500 text-white rounded-lg py-2.5 text-sm font-medium hover:bg-rose-600 transition disabled:opacity-50"
+              className="mt-4 w-full bg-rose-500 text-white rounded-lg py-2.5 text-sm font-medium hover:bg-rose-600 transition disabled:opacity-50 cursor-pointer"
             >
               {saving ? 'Saving...' : 'Save Changes'}
             </button>
@@ -124,14 +116,14 @@ export default function ProfilePage() {
           <h2 className="text-md font-semibold text-gray-800 mb-4">Quick Actions</h2>
           <div className="space-y-3">
             <button
-              onClick={() => router.push('/quiz')}
-              className="w-full text-left px-4 py-3 rounded-xl border border-gray-200 text-sm text-gray-700 hover:border-rose-200 transition"
+              onClick={() => router.push('/quiz?back=profile')}
+              className="w-full text-left px-4 py-3 rounded-xl border border-gray-200 text-sm text-gray-700 hover:border-rose-200 transition cursor-pointer"
             >
               🔄 Retake Quiz
             </button>
             <button
               onClick={() => router.push('/scan')}
-              className="w-full text-left px-4 py-3 rounded-xl border border-gray-200 text-sm text-gray-700 hover:border-rose-200 transition"
+              className="w-full text-left px-4 py-3 rounded-xl border border-gray-200 text-sm text-gray-700 hover:border-rose-200 transition cursor-pointer"
             >
               📷 New Scan
             </button>

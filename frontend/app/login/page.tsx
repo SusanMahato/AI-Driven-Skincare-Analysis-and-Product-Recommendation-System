@@ -65,7 +65,7 @@ export default function LoginPage() {
             <div>
               <div className="flex justify-between items-center mb-1.5">
                 <label className="block text-sm font-medium text-gray-700">Password</label>
-                <a href="/forgot-password" className="text-xs text-rose-500 hover:underline">Forgot password?</a>
+                <a href="/forgot-password" className="text-xs text-rose-500 hover:underline cursor-pointer">Forgot password?</a>
               </div>
               <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-rose-300 bg-white" placeholder="••••••••" />
             </div>
@@ -74,18 +74,18 @@ export default function LoginPage() {
               <label htmlFor="remember" className="text-sm text-gray-600">Remember me for 30 days</label>
             </div>
             {error && <div className="bg-red-50 border border-red-200 rounded-xl px-4 py-3"><p className="text-red-600 text-sm">{error}</p></div>}
-            <button type="submit" disabled={loading} className="w-full bg-rose-500 text-white rounded-xl py-3 text-sm font-semibold hover:bg-rose-600 transition disabled:opacity-50 shadow-sm">{loading ? 'Signing in...' : 'Sign In'}</button>
+            <button type="submit" disabled={loading} className="w-full bg-rose-500 text-white rounded-xl py-3 text-sm font-semibold hover:bg-rose-600 transition disabled:opacity-50 shadow-sm cursor-pointer">{loading ? 'Signing in...' : 'Sign In'}</button>
           </form>
           <div className="relative my-6">
             <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-gray-200"></div></div>
             <div className="relative flex justify-center text-sm"><span className="bg-rose-50 px-2 text-gray-400">or continue with</span></div>
           </div>
-          <a href="http://localhost:8000/auth/google" className="w-full flex items-center justify-center gap-3 border border-gray-200 rounded-xl py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 transition">
+          <a href="http://localhost:8000/auth/google" className="w-full flex items-center justify-center gap-3 border border-gray-200 rounded-xl py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 transition cursor-pointer">
             <img src="https://www.google.com/favicon.ico" width="18" height="18" alt="Google" />
             Sign in with Google
           </a>
           <div className="mt-6 text-center">
-            <p className="text-sm text-gray-500">Don't have an account?{' '}<a href="/register" className="text-rose-500 font-semibold hover:underline">Create an account</a></p>
+            <p className="text-sm text-gray-500">Don't have an account?{' '}<a href="/register" className="text-rose-500 font-semibold hover:underline cursor-pointer">Create an account</a></p>
           </div>
         </div>
       </div>
