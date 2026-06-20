@@ -77,8 +77,11 @@ frontend/
 ├── app/ — Next.js routes
 ├── components/
 └── lib/ — API client, auth helpers
-uploaded_scans/ — user-uploaded photos (gitignored)
-
+├── uploaded_scans/ — user-uploaded photos (gitignored)
+├── requirements.txt — Python dependencies
+├── alembic.ini — Alembic configuration
+├── .gitignore
+└── README.md
 ```
 ## Running it locally
 
