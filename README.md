@@ -65,18 +65,18 @@ The CV component is the part I spent the most time on, since no single public da
 
 ## Project structure
 ```
-app/
-├── api/routes/ — auth, scan, quiz, recommendation, weather, oauth
-├── core/ — config, db session, dependency injection
-├── models/ — SQLAlchemy ORM models
-├── schemas/ — request/response validation
-├── services/ — business logic: auth, CV inference, recommendation, email
-└── models_weights/ — trained model weights (.pt)
-alembic/ — database migrations
-frontend/
-├── app/ — Next.js routes
-├── components/
-└── lib/ — API client, auth helpers
+├── app/
+    ├── api/routes/ — auth, scan, quiz, recommendation, weather, oauth
+    ├── core/ — config, db session, dependency injection
+    ├── models/ — SQLAlchemy ORM models
+    ├── schemas/ — request/response validation
+    ├── services/ — business logic: auth, CV inference, recommendation, email
+    └── models_weights/ — trained model weights (.pt)
+├── alembic/ — database migrations
+├── frontend/
+    ├── app/ — Next.js routes
+    ├── components/
+    └── lib/ — API client, auth helpers
 ├── uploaded_scans/ — user-uploaded photos (gitignored)
 ├── requirements.txt — Python dependencies
 ├── alembic.ini — Alembic configuration
