@@ -122,7 +122,7 @@ export default function LandingPage() {
 
       {/* Footer */}
       <div className="border-t border-gray-100 px-6 py-8 text-center">
-        <p className="text-sm text-gray-400">© 2026 SkinCare AI · Built with ❤️ for better skin</p>
+        <p className="text-sm text-gray-400">© Built with ❤️ for better skin</p>
       </div>
 
     </div>

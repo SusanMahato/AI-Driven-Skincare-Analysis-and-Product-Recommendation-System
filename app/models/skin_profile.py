@@ -17,6 +17,7 @@ class SkinProfile(Base):
     concern_one = Column(String, nullable=True)
     concern_two = Column(String, nullable=True)
     skin_goal = Column(String, nullable=True)
+    budget_tier = Column(String(20), nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 

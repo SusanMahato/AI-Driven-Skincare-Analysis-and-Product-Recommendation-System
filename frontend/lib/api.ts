@@ -50,5 +50,6 @@ export const getScanHistory = () => api.get('/scan/history');
 
 // Recommendation
 export const getRecommendation = () => api.get('/recommendation/latest');
+export const getProductRecommendations = () => api.get('/recommendation/products');
 
 export default api;

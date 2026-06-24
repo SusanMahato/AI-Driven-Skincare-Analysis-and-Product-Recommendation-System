@@ -2,14 +2,16 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { getRecommendation, getScanHistory } from '@/lib/api';
+import { getRecommendation, getScanHistory, getProductRecommendations } from '@/lib/api';
 import { isLoggedIn, removeToken } from '@/lib/auth';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import ProductTabs from '@/components/ProductTabs';
 
 export default function DashboardPage() {
   const router = useRouter();
   const [recommendation, setRecommendation] = useState<any>(null);
   const [scanHistory, setScanHistory] = useState<any[]>([]);
+  const [productRec, setProductRec] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('overview');
   const [selectedScan, setSelectedScan] = useState<any>(null);
@@ -27,11 +29,18 @@ export default function DashboardPage() {
   const loadData = async () => {
     try {
       const [recRes, histRes] = await Promise.all([
-        getRecommendation(),
-        getScanHistory()
+        getRecommendation().catch(() => ({ data: null })),
+        getScanHistory().catch(() => ({ data: [] })),
       ]);
       setRecommendation(recRes.data);
       setScanHistory(histRes.data);
+
+      try {
+        const prodRes = await getProductRecommendations();
+        setProductRec(prodRes.data);
+      } catch {
+        setProductRec(null);
+      }
     } catch (err) {
       console.error(err);
     } finally {
@@ -39,7 +48,7 @@ export default function DashboardPage() {
     }
   };
 
- const chartData = [...scanHistory].reverse().map((scan: any, index: number) => ({
+  const chartData = [...scanHistory].reverse().map((scan: any, index: number) => ({
     scan: `#${index + 1}`,
     date: new Date(scan.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
     Acne: Math.round(scan.acne_score * 100),
@@ -128,8 +137,8 @@ export default function DashboardPage() {
         </div>
 
         {/* Tabs */}
-        <div className="flex gap-2 mb-6">
-          {['overview', 'progress', 'history'].map((tab) => (
+        <div className="flex gap-2 mb-6 flex-wrap">
+          {['overview', 'recommendations', 'progress', 'history'].map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
@@ -139,16 +148,57 @@ export default function DashboardPage() {
                   : 'bg-white text-gray-600 border border-gray-200 hover:border-rose-200'
               }`}
             >
-              {tab}
+              {tab === 'recommendations' ? '🧴 Products' : tab}
             </button>
           ))}
         </div>
 
-        {/* Overview Tab */}
+       {/* Overview Tab */}
         {activeTab === 'overview' && (
           <div className="space-y-6">
             {recommendation ? (
               <>
+                {/* Skin Condition Scores */}
+                {scanHistory.length > 0 && (
+                  <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+                    <div className="flex items-center gap-2 mb-4">
+                      <span className="text-lg">📊</span>
+                      <h3 className="font-semibold text-gray-800">Your Skin Conditions</h3>
+                    </div>
+                    <div className="space-y-3">
+                      {[
+                        { label: 'Acne', key: 'acne_score', color: 'bg-rose-500' },
+                        { label: 'Redness', key: 'redness_score', color: 'bg-orange-400' },
+                        { label: 'Texture', key: 'texture_score', color: 'bg-purple-500' },
+                        { label: 'Dark Spots', key: 'dark_spots_score', color: 'bg-amber-500' },
+                        { label: 'Pores', key: 'pores_score', color: 'bg-blue-500' },
+                        { label: 'Dark Circles', key: 'dark_circles_score', color: 'bg-indigo-500' },
+                      ].map(({ label, key, color }) => {
+                        const score = Math.round((scanHistory[0][key] || 0) * 100);
+                        const severity = score >= 60 ? 'High' : score >= 30 ? 'Moderate' : 'Low';
+                        const severityColor = score >= 60 ? 'text-rose-500' : score >= 30 ? 'text-amber-500' : 'text-green-500';
+                        return (
+                          <div key={key}>
+                            <div className="flex justify-between items-center mb-1">
+                              <span className="text-sm text-gray-700">{label}</span>
+                              <div className="flex items-center gap-2">
+                                <span className={`text-xs font-medium ${severityColor}`}>{severity}</span>
+                                <span className="text-sm font-bold text-gray-800">{score}%</span>
+                              </div>
+                            </div>
+                            <div className="w-full bg-gray-100 rounded-full h-2">
+                              <div
+                                className={`${color} h-2 rounded-full transition-all`}
+                                style={{ width: `${score}%` }}
+                              />
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+
                 {/* Skin Report */}
                 <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
                   <div className="flex items-center gap-2 mb-4">
@@ -158,37 +208,19 @@ export default function DashboardPage() {
                   <p className="text-gray-600 text-sm leading-relaxed">{recommendation.skin_report}</p>
                 </div>
 
-                {/* Routines */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="bg-gradient-to-br from-amber-50 to-orange-50 rounded-2xl p-6 border border-orange-100">
-                    <p className="text-sm font-semibold text-orange-600 mb-3">☀️ Morning Routine</p>
-                    <div className="space-y-2">
-                      {recommendation.morning_routine.map((step: string, i: number) => (
-                        <div key={i} className="flex items-center gap-3 bg-white rounded-xl px-3 py-2">
-                          <span className="w-5 h-5 bg-orange-100 text-orange-600 rounded-full text-xs flex items-center justify-center font-bold">{i + 1}</span>
-                          <span className="text-sm text-gray-700">{step}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                  <div className="bg-gradient-to-br from-indigo-50 to-purple-50 rounded-2xl p-6 border border-purple-100">
-                    <p className="text-sm font-semibold text-purple-600 mb-3">🌙 Night Routine</p>
-                    <div className="space-y-2">
-                      {recommendation.night_routine.map((step: string, i: number) => (
-                        <div key={i} className="flex items-center gap-3 bg-white rounded-xl px-3 py-2">
-                          <span className="w-5 h-5 bg-purple-100 text-purple-600 rounded-full text-xs flex items-center justify-center font-bold">{i + 1}</span>
-                          <span className="text-sm text-gray-700">{step}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-
-                {/* Ingredients */}
+                {/* Recommended Ingredients */}
                 <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-                  <div className="flex items-center gap-2 mb-4">
-                    <span className="text-lg">🧴</span>
-                    <h3 className="font-semibold text-gray-800">Recommended Ingredients</h3>
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center gap-2">
+                      <span className="text-lg">🧴</span>
+                      <h3 className="font-semibold text-gray-800">Recommended Ingredients</h3>
+                    </div>
+                    <button
+                      onClick={() => setActiveTab('recommendations')}
+                      className="text-xs text-rose-500 font-medium hover:underline cursor-pointer"
+                    >
+                      See products →
+                    </button>
                   </div>
                   <div className="flex flex-wrap gap-2">
                     {recommendation.ingredients.map((ing: string, i: number) => (
@@ -209,6 +241,27 @@ export default function DashboardPage() {
                   className="bg-rose-500 text-white px-6 py-2.5 rounded-xl text-sm font-medium hover:bg-rose-600 transition cursor-pointer"
                 >
                   Start Quiz →
+                </button>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Recommendations Tab */}
+        {activeTab === 'recommendations' && (
+          <div>
+            {productRec ? (
+              <ProductTabs data={productRec} />
+            ) : (
+              <div className="bg-white rounded-2xl p-12 shadow-sm border border-gray-100 text-center">
+                <p className="text-4xl mb-3">🧴</p>
+                <h3 className="font-semibold text-gray-800 mb-2">No recommendations yet</h3>
+                <p className="text-gray-500 text-sm mb-4">Complete the quiz and do a scan to get personalized product recommendations.</p>
+                <button
+                  onClick={() => router.push('/scan')}
+                  className="bg-rose-500 text-white px-6 py-2.5 rounded-xl text-sm font-medium hover:bg-rose-600 transition cursor-pointer"
+                >
+                  Start Scan →
                 </button>
               </div>
             )}
@@ -252,7 +305,7 @@ export default function DashboardPage() {
                   </div>
                 </div>
 
-               {/* Small Multiples Charts */}
+                {/* Charts */}
                 <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
                   <h3 className="font-semibold text-gray-800 mb-2">Skin Progress Over Time</h3>
                   <p className="text-xs text-gray-400 mb-6">Lower is better — a downward trend means improvement</p>
@@ -279,7 +332,8 @@ export default function DashboardPage() {
                       </div>
                     ))}
                   </div>
-                </div>    </>
+                </div>
+              </>
             ) : (
               <div className="bg-white rounded-2xl p-12 shadow-sm border border-gray-100 text-center">
                 <p className="text-gray-400 text-sm">Do at least 2 scans to see your progress chart.</p>
