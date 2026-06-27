@@ -4,10 +4,11 @@ from app.core.config import settings
 resend.api_key = settings.RESEND_API_KEY
 
 def send_verification_email(email: str, full_name: str, token: str):
-    verification_url = f"http://localhost:3000/verify-email?token={token}"
+    
+    verification_url = f"http://192.168.18.129:3000/verify-email?token={token}"
     
     resend.Emails.send({
-        "from": "SkinCare AI <onboarding@resend.dev>",
+        "from": "SkinCare AI <noreply@susanmahato.com.np>",
         "to": email,
         "subject": "Verify your SkinCare AI account",
         "html": f"""
@@ -28,7 +29,7 @@ def send_verification_email(email: str, full_name: str, token: str):
 
 def send_password_reset_email(email: str, full_name: str, otp: str):
     resend.Emails.send({
-        "from": "SkinCare AI <onboarding@resend.dev>",
+         "from": "SkinCare AI <noreply@susanmahato.com.np>",
         "to": email,
         "subject": "Reset your SkinCare AI password",
         "html": f"""
