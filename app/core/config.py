@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 
- class Settings(BaseSettings):
+class Settings(BaseSettings):
     DATABASE_URL: str
     SECRET_KEY: str
     ALGORITHM: str = "HS256"
