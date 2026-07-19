@@ -41,7 +41,7 @@ def get_latest_recommendation(
     cv_scores = {
         "acne_score": scan.acne_score,
         "redness_score": scan.redness_score,
-        "texture_score": scan.texture_score,
+        "wrinkles_score": scan.wrinkles_score,
         "dark_spots_score": scan.dark_spots_score,
         "pores_score": scan.pores_score,
         "dark_circles_score": scan.dark_circles_score
@@ -103,7 +103,7 @@ def get_product_recommendations(
     cv_scores = {
         "acne_score": scan.acne_score,
         "redness_score": scan.redness_score,
-        "texture_score": scan.texture_score,
+        "wrinkles_score": scan.wrinkles_score,
         "dark_spots_score": scan.dark_spots_score,
         "pores_score": scan.pores_score,
         "dark_circles_score": scan.dark_circles_score

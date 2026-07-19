@@ -7,3 +7,4 @@ __pycache__/
 *.pyc
 uploaded_scans/
 scripts/data/
+app/models_weights/*.pt

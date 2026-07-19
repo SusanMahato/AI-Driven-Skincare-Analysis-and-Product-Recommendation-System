@@ -64,7 +64,7 @@ async def analyze(
         photo_url=photo_url,
         acne_score=cv_scores["acne_score"],
         redness_score=cv_scores["redness_score"],
-        texture_score=cv_scores["texture_score"],
+        wrinkles_score=cv_scores["wrinkles_score"],
         dark_spots_score=cv_scores["dark_spots_score"],
         pores_score=cv_scores["pores_score"],
         dark_circles_score=cv_scores["dark_circles_score"],

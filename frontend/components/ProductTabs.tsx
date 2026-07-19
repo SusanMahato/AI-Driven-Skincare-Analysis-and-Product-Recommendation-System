@@ -139,7 +139,7 @@ export default function ProductTabs({ data }: ProductTabsProps) {
             {/* Missing steps */}
             {missingSteps.length > 0 && (
               <div className="bg-gray-50 border border-gray-100 rounded-xl p-4">
-                <p className="text-xs font-semibold text-gray-500 mb-2">No match found for:</p>
+                <p className="text-xs font-semibold text-gray-500 mb-2">Still looking for a match in:</p>
                 <div className="flex flex-wrap gap-2 mb-2">
                   {missingSteps.map(s => (
                     <span key={s} className="text-xs bg-white border border-gray-200 text-gray-400 px-3 py-1 rounded-full capitalize">
@@ -147,7 +147,7 @@ export default function ProductTabs({ data }: ProductTabsProps) {
                     </span>
                   ))}
                 </div>
-                <p className="text-xs text-gray-400">Try a different price tier or do a new scan to get more matches.</p>
+                <p className="text-xs text-gray-400">We didn't find a great fit for this tier yet — try Budget or Premium, or rescan for fresh picks.</p>
               </div>
             )}
           </div>

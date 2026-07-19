@@ -53,7 +53,7 @@ export default function DashboardPage() {
     date: new Date(scan.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
     Acne: Math.round(scan.acne_score * 100),
     Redness: Math.round(scan.redness_score * 100),
-    Texture: Math.round(scan.texture_score * 100),
+    Wrinkles: Math.round(scan.wrinkles_score * 100),
     'Dark Spots': Math.round(scan.dark_spots_score * 100),
     Pores: Math.round(scan.pores_score * 100),
     'Dark Circles': Math.round(scan.dark_circles_score * 100),
@@ -169,7 +169,7 @@ export default function DashboardPage() {
                       {[
                         { label: 'Acne', key: 'acne_score', color: 'bg-rose-500' },
                         { label: 'Redness', key: 'redness_score', color: 'bg-orange-400' },
-                        { label: 'Texture', key: 'texture_score', color: 'bg-purple-500' },
+                        { label: 'Wrinkles', key: 'wrinkles_score', color: 'bg-purple-500' },
                         { label: 'Dark Spots', key: 'dark_spots_score', color: 'bg-amber-500' },
                         { label: 'Pores', key: 'pores_score', color: 'bg-blue-500' },
                         { label: 'Dark Circles', key: 'dark_circles_score', color: 'bg-indigo-500' },
@@ -280,7 +280,7 @@ export default function DashboardPage() {
                     {[
                       { label: 'Acne', key: 'acne_score', color: 'text-rose-500' },
                       { label: 'Redness', key: 'redness_score', color: 'text-orange-500' },
-                      { label: 'Texture', key: 'texture_score', color: 'text-purple-500' },
+                      { label: 'Wrinkles', key: 'wrinkles_score', color: 'text-purple-500' },
                       { label: 'Dark Spots', key: 'dark_spots_score', color: 'text-amber-600' },
                       { label: 'Pores', key: 'pores_score', color: 'text-blue-500' },
                       { label: 'Dark Circles', key: 'dark_circles_score', color: 'text-indigo-500' },
@@ -313,7 +313,7 @@ export default function DashboardPage() {
                     {[
                       { key: 'Acne', color: '#dc2626' },
                       { key: 'Redness', color: '#ea580c' },
-                      { key: 'Texture', color: '#9333ea' },
+                      { key: 'Wrinkles', color: '#9333ea' },
                       { key: 'Dark Spots', color: '#16a34a' },
                       { key: 'Pores', color: '#2563eb' },
                       { key: 'Dark Circles', color: '#db2777' },
@@ -420,8 +420,8 @@ export default function DashboardPage() {
                   <p className="text-lg font-bold text-orange-500">{Math.round(selectedScan.redness_score * 100)}%</p>
                 </div>
                 <div className="bg-gray-50 rounded-lg p-3">
-                  <p className="text-xs text-gray-400">Texture</p>
-                  <p className="text-lg font-bold text-purple-500">{Math.round(selectedScan.texture_score * 100)}%</p>
+                  <p className="text-xs text-gray-400">Wrinkles</p>
+                  <p className="text-lg font-bold text-purple-500">{Math.round(selectedScan.wrinkles_score * 100)}%</p>
                 </div>
                 <div className="bg-gray-50 rounded-lg p-3">
                   <p className="text-xs text-gray-400">Dark Spots</p>

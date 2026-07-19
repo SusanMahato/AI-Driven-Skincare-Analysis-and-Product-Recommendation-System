@@ -31,7 +31,7 @@ def get_recommended_ingredients(cv_scores: dict, skin_profile: dict) -> list:
         ingredients.append("Centella Asiatica")
         ingredients.append("Azelaic Acid")
 
-    if cv_scores.get("texture_score", 0) > 0.5:
+    if cv_scores.get("wrinkles_score", 0) > 0.5:
         ingredients.append("Glycolic Acid")
         ingredients.append("Retinol")
 
@@ -73,7 +73,7 @@ def generate_skin_report(
         f"SKIN SCORES (0-1, higher = more severe):\n"
         f"- Acne: {cv_scores.get('acne_score')}\n"
         f"- Redness: {cv_scores.get('redness_score')}\n"
-        f"- Texture: {cv_scores.get('texture_score')}\n"
+        f"- Wrinkles: {cv_scores.get('wrinkles_score')}\n"
         f"- Dark Spots: {cv_scores.get('dark_spots_score')}\n"
         f"- Pores: {cv_scores.get('pores_score')}\n"
         f"- Dark Circles: {cv_scores.get('dark_circles_score')}\n\n"
@@ -114,7 +114,7 @@ SCORE_THRESHOLD = 0.10
 SCORE_TO_CONDITION = {
     "acne_score": "acne",
     "redness_score": "redness",
-    "texture_score": "texture",
+    "wrinkles_score": "texture",
     "dark_spots_score": "dark_spots",
     "pores_score": "pores",
     "dark_circles_score": "dark_circles",

@@ -28,7 +28,7 @@ const questions = [
     id: 'products_used_before',
     question: 'Have you used skincare products before?',
     emoji: '🧴',
-    options: ['Never', 'Occasionally', 'Moisturizer', 'Serum', 'Sunscreen'],
+    options: ['Never', 'Occasionally', 'Regularly', 'Used to but stopped'],
   },
   {
     id: 'sun_exposure',
@@ -41,6 +41,12 @@ const questions = [
     question: 'What is your main skin concern?',
     emoji: '🔍',
     options: ['Acne', 'Oiliness', 'Dryness', 'Redness', 'Dark spots', 'Wrinkles', 'Dark circles', 'Pores'],
+  },
+  {
+    id: 'concern_two',
+    question: 'Do you have a secondary skin concern?',
+    emoji: '🔍',
+    options: ['Acne', 'Oiliness', 'Dryness', 'Redness', 'Dark spots', 'Wrinkles', 'Dark circles', 'Pores', 'None'],
   },
   {
     id: 'skin_goal',
@@ -84,7 +90,12 @@ export default function QuizPage() {
     setLoading(true);
     setError('');
     try {
-      await submitQuiz({ ...answers, concern_two: null, sensitivity: null });
+      const submitData = {
+        ...answers,
+        concern_two: answers.concern_two === 'None' ? null : answers.concern_two,
+        sensitivity: null
+      };
+      await submitQuiz(submitData);
       router.push('/scan');
     } catch (err) {
       setError('Something went wrong. Please try again.');

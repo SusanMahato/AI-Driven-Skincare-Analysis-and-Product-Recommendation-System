@@ -2,129 +2,219 @@
 
 import { useRouter } from 'next/navigation';
 
+const steps = [
+  ['01', 'Take the skin quiz', 'Share your skin type, goals, routine habits, and main concerns.'],
+  ['02', 'Upload a clear face photo', 'The AI scan checks six visible skin concern categories.'],
+  ['03', 'Add weather context', 'UV, humidity, and temperature help shape daily skincare guidance.'],
+  ['04', 'Get matched products', 'Ingredients and products are ranked around your scan and profile.'],
+];
+
+const concerns = ['Acne', 'Redness', 'Wrinkles', 'Dark spots', 'Pores', 'Dark circles'];
+
+const personalization = [
+  ['Skin profile', 'Skin type, sensitivity, goals, and routine preferences from the quiz.'],
+  ['AI scan', 'Six condition scores from your uploaded face photo.'],
+  ['Weather and UV', 'Daily SPF and hydration guidance based on local conditions.'],
+  ['Ingredient matching', 'Product suggestions connected to concerns like pores, spots, and dark circles.'],
+];
+
 export default function LandingPage() {
   const router = useRouter();
 
   return (
-    <div className="min-h-screen bg-white">
-
-      {/* Header */}
-      <div className="border-b border-gray-100 px-6 py-4 flex justify-between items-center sticky top-0 bg-white/90 backdrop-blur-md z-10">
-        <h1 className="text-xl font-bold text-rose-500">SkinCare AI</h1>
-        <div className="flex gap-3">
+    <main className="min-h-screen bg-[#F5F2EA] text-[#20241F]">
+      <header className="sticky top-0 z-30 border-b border-[#20241F]/10 bg-[#F5F2EA]/90 px-5 py-4 backdrop-blur-md">
+        <div className="mx-auto flex max-w-7xl items-center justify-between gap-4">
           <button
-            onClick={() => router.push('/login')}
-            className="border border-gray-200 text-gray-700 px-4 py-2 rounded-xl text-sm font-medium hover:bg-gray-50 transition cursor-pointer"
+            onClick={() => router.push('/')}
+            className="text-left font-[family-name:var(--font-display)] text-xl font-medium tracking-wide text-[#20241F]"
           >
-            Sign In
+            SkinCare AI
           </button>
-          <button
-            onClick={() => router.push('/register')}
-            className="bg-rose-500 text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-rose-600 transition cursor-pointer"
-          >
-            Get Started Free
-          </button>
-        </div>
-      </div>
-
-      {/* Hero */}
-      <div className="max-w-5xl mx-auto px-6 py-24 text-center">
-        <div className="inline-flex items-center gap-2 bg-rose-50 text-rose-600 text-xs font-medium px-3 py-1.5 rounded-full mb-6 border border-rose-100">
-          ✨ AI-Powered Skin Analysis
-        </div>
-        <h2 className="text-5xl font-bold text-gray-900 mb-6 leading-tight">
-          Know Your Skin.<br />
-          <span className="text-rose-500">Glow With Confidence.</span>
-        </h2>
-        <p className="text-gray-500 text-xl mb-10 max-w-2xl mx-auto leading-relaxed">
-          Upload a photo, answer a few questions, and get a personalized skincare routine powered by AI — tailored to your skin type and today's weather.
-        </p>
-        <div className="flex gap-4 justify-center flex-wrap">
-          <button
-            onClick={() => router.push('/register')}
-            className="bg-rose-500 text-white px-8 py-4 rounded-xl text-md font-semibold hover:bg-rose-600 transition shadow-lg shadow-rose-200 cursor-pointer"
-          >
-            Start Free Analysis →
-          </button>
-          <button
-            onClick={() => router.push('/login')}
-            className="border border-gray-200 text-gray-700 px-8 py-4 rounded-xl text-md font-semibold hover:bg-gray-50 transition cursor-pointer"
-          >
-            Sign In
-          </button>
-        </div>
-        <p className="text-xs text-gray-400 mt-4">Free forever · No credit card required</p>
-      </div>
-
-      {/* How it works */}
-      <div className="bg-gray-50 py-20">
-        <div className="max-w-5xl mx-auto px-6">
-          <div className="text-center mb-12">
-            <h3 className="text-3xl font-bold text-gray-800 mb-3">How It Works</h3>
-            <p className="text-gray-500">Three simple steps to better skin</p>
+          <nav className="hidden items-center gap-8 text-sm font-medium text-[#20241F]/60 md:flex">
+            <a href="#how-it-works" className="hover:text-[#20241F]">How it works</a>
+            <a href="#analysis" className="hover:text-[#20241F]">Analysis</a>
+            <a href="#recommendations" className="hover:text-[#20241F]">Recommendations</a>
+          </nav>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => router.push('/login')}
+              className="cursor-pointer rounded-md border border-[#20241F]/15 bg-white/60 px-4 py-2 text-sm font-semibold text-[#20241F]/80 transition hover:bg-white"
+            >
+              Sign in
+            </button>
+            <button
+              onClick={() => router.push('/register')}
+              className="cursor-pointer rounded-md bg-[#182019] px-4 py-2 text-sm font-semibold text-[#F5F2EA] transition hover:bg-[#BD7B54]"
+            >
+              Start scan
+            </button>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {[
-              { step: '01', emoji: '📋', title: 'Take the Quiz', desc: 'Answer 7 quick questions about your skin type, concerns and goals.' },
-              { step: '02', emoji: '📷', title: 'Upload a Photo', desc: 'Take a clear selfie and our AI analyzes acne, redness, texture and more.' },
-              { step: '03', emoji: '✨', title: 'Get Your Routine', desc: 'Receive a personalized morning and night routine with recommended ingredients.' },
-            ].map(({ step, emoji, title, desc }) => (
-              <div key={step} className="text-center">
-                <div className="w-16 h-16 bg-rose-100 rounded-2xl flex items-center justify-center text-3xl mx-auto mb-4">
-                  {emoji}
-                </div>
-                <p className="text-xs font-bold text-rose-400 mb-2">STEP {step}</p>
-                <h4 className="font-bold text-gray-800 text-lg mb-2">{title}</h4>
-                <p className="text-gray-500 text-sm leading-relaxed">{desc}</p>
+        </div>
+      </header>
+
+      {/* HERO — untouched structure, original photo, no overlay treatment */}
+      <section className="relative overflow-hidden border-b border-[#20241F]/10">
+        <img
+          src="/landing-hero.jpeg"
+          alt="Person applying skincare cream"
+          loading="eager"
+          className="absolute inset-0 h-full w-full object-cover object-[85%_50%]"
+        />
+        <div className="relative mx-auto grid min-h-[720px] max-w-7xl items-center gap-10 px-5 py-20 lg:grid-cols-1">
+          <div className="max-w-2xl">
+            <p className="mb-5 font-[family-name:var(--font-mono)] text-xs font-bold uppercase tracking-[0.26em] text-[#BD7B54]">
+              AI skin analysis and recommendations
+            </p>
+            <h1 className="max-w-xl font-[family-name:var(--font-display)] text-5xl font-medium leading-[1.02] text-[#20241F] md:text-7xl">
+              Understand your skin before choosing products.
+            </h1>
+            <p className="mt-6 max-w-xl text-lg leading-8 text-[#20241F]/70">
+              Upload a face photo, complete a short skin quiz, and get concern scores plus product recommendations matched to your skin profile and local weather.
+            </p>
+            <div className="mt-9 flex flex-col gap-3 sm:flex-row">
+              <button
+                onClick={() => router.push('/register')}
+                className="cursor-pointer rounded-md bg-[#182019] px-6 py-3 font-[family-name:var(--font-mono)] text-xs uppercase tracking-[0.1em] text-[#F5F2EA] transition hover:bg-[#BD7B54]"
+              >
+                Start skin analysis
+              </button>
+              <button
+                onClick={() => router.push('/login')}
+                className="cursor-pointer rounded-md border border-[#20241F]/20 bg-white/70 px-6 py-3 font-[family-name:var(--font-mono)] text-xs uppercase tracking-[0.1em] text-[#20241F]/80 transition hover:bg-white"
+              >
+                Take skin quiz
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="border-b border-[#20241F]/10 bg-[#182019] px-5 py-5 text-[#F5F2EA]">
+        <div className="mx-auto grid max-w-7xl gap-4 font-[family-name:var(--font-mono)] text-xs uppercase tracking-[0.08em] sm:grid-cols-2 lg:grid-cols-4">
+          <p>AI photo scan</p>
+          <p>Weather-aware SPF guidance</p>
+          <p>Ingredient matching</p>
+          <p>Personalized product ranking</p>
+        </div>
+      </section>
+
+      <section id="how-it-works" className="mx-auto max-w-7xl px-5 py-20">
+        <div className="max-w-2xl">
+          <p className="font-[family-name:var(--font-mono)] text-xs font-bold uppercase tracking-[0.2em] text-[#BD7B54]">How it works</p>
+          <h2 className="mt-3 font-[family-name:var(--font-display)] text-4xl font-medium text-[#20241F]">
+            From skin quiz to product match.
+          </h2>
+        </div>
+        <div className="mt-10 grid gap-4 md:grid-cols-4">
+          {steps.map(([number, title, text]) => (
+            <article key={number} className="rounded-lg border border-[#20241F]/12 bg-white p-5">
+              <p className="font-[family-name:var(--font-mono)] text-sm font-bold text-[#BD7B54]">{number}</p>
+              <h3 className="mt-8 font-[family-name:var(--font-display)] text-lg font-medium text-[#20241F]">{title}</h3>
+              <p className="mt-3 text-sm leading-6 text-[#20241F]/60">{text}</p>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section id="analysis" className="bg-white px-5 py-20">
+        <div className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-[0.8fr_1.2fr]">
+          <div>
+            <p className="font-[family-name:var(--font-mono)] text-xs font-bold uppercase tracking-[0.2em] text-[#BD7B54]">What we analyze</p>
+            <h2 className="mt-3 font-[family-name:var(--font-display)] text-4xl font-medium text-[#20241F]">
+              Six visible skin concern categories.
+            </h2>
+            <p className="mt-5 max-w-md leading-7 text-[#20241F]/60">
+              The scan is designed around the same six classes used by your model, so the landing page matches the real product.
+            </p>
+          </div>
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {concerns.map((concern) => (
+              <div key={concern} className="rounded-lg border border-[#20241F]/12 bg-[#F5F2EA] p-5">
+                <p className="font-[family-name:var(--font-display)] text-lg font-medium text-[#20241F]">{concern}</p>
+                <p className="mt-3 text-sm leading-6 text-[#20241F]/60">Scored as low, medium, or high after a clear face photo scan.</p>
               </div>
             ))}
           </div>
         </div>
-      </div>
+      </section>
 
-      {/* Features */}
-      <div className="max-w-5xl mx-auto px-6 py-20">
-        <div className="text-center mb-12">
-          <h3 className="text-3xl font-bold text-gray-800 mb-3">Everything Your Skin Needs</h3>
-          <p className="text-gray-500">Powered by AI, personalized for you</p>
+      <section id="recommendations" className="mx-auto max-w-7xl px-5 py-20">
+        <div className="grid gap-10 lg:grid-cols-[1fr_0.9fr] lg:items-center">
+          <div>
+            <p className="font-[family-name:var(--font-mono)] text-xs font-bold uppercase tracking-[0.2em] text-[#BD7B54]">Personalized recommendations</p>
+            <h2 className="mt-3 font-[family-name:var(--font-display)] text-4xl font-medium text-[#20241F]">
+              Care suggestions based on more than a selfie.
+            </h2>
+            <p className="mt-5 max-w-xl leading-7 text-[#20241F]/60">
+              Recommendations combine your quiz, scan scores, local weather, and ingredient matching so the output feels specific to your skin.
+            </p>
+          </div>
+          <div className="grid gap-3">
+            {personalization.map(([title, text]) => (
+              <div key={title} className="rounded-lg border border-[#20241F]/12 bg-white p-5">
+                <h3 className="font-[family-name:var(--font-display)] font-medium text-[#20241F]">{title}</h3>
+                <p className="mt-2 text-sm leading-6 text-[#20241F]/60">{text}</p>
+              </div>
+            ))}
+          </div>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {[
-            { emoji: '🔬', title: 'Deep Skin Analysis', desc: 'Detects acne, redness, texture, dark spots, pores and dark circles from a single photo.' },
-            { emoji: '🌤️', title: 'Weather-Aware', desc: 'UV index, humidity and temperature all factor into your daily recommendations.' },
-            { emoji: '📈', title: 'Progress Tracking', desc: 'Track improvement across all skin conditions with beautiful progress charts.' },
-            { emoji: '🧴', title: 'Ingredient Guide', desc: 'Know exactly why each ingredient was chosen and how to use it safely.' },
-            { emoji: '🎯', title: 'Goal-Based Routine', desc: 'Whether you want clear skin, anti-aging, or hydration — we build around your goal.' },
-            { emoji: '🔒', title: 'Private & Secure', desc: 'Your photos and skin data are yours. We never share your personal information.' },
-          ].map(({ emoji, title, desc }) => (
-            <div key={title} className="bg-white border border-gray-100 rounded-2xl p-6 hover:shadow-md transition hover:border-rose-100">
-              <p className="text-3xl mb-3">{emoji}</p>
-              <h4 className="font-semibold text-gray-800 mb-2">{title}</h4>
-              <p className="text-sm text-gray-500 leading-relaxed">{desc}</p>
-            </div>
-          ))}
-        </div>
-      </div>
+      </section>
 
-      {/* CTA */}
-      <div className="bg-gradient-to-br from-rose-500 to-pink-500 py-20">
-        <div className="max-w-2xl mx-auto px-6 text-center">
-          <h3 className="text-3xl font-bold text-white mb-4">Ready to Transform Your Skin?</h3>
-          <p className="text-rose-100 text-lg mb-8">Join and get your personalized skincare routine in minutes.</p>
+      <section className="bg-[#93A899]/25 px-5 py-16">
+        <div className="mx-auto flex max-w-7xl flex-col items-start justify-between gap-6 md:flex-row md:items-center">
+          <div>
+            <p className="font-[family-name:var(--font-mono)] text-xs font-bold uppercase tracking-[0.2em] text-[#BD7B54]">Ready when you are</p>
+            <h2 className="mt-3 font-[family-name:var(--font-display)] text-3xl font-medium text-[#20241F]">
+              Start with a quiz, then scan your skin.
+            </h2>
+            <p className="mt-3 max-w-xl text-sm leading-6 text-[#20241F]/70">
+              Personalized skincare guidance begins the moment you answer a few simple questions.
+            </p>
+          </div>
           <button
             onClick={() => router.push('/register')}
-            className="bg-white text-rose-500 px-8 py-4 rounded-xl text-md font-bold hover:bg-rose-50 transition shadow-lg cursor-pointer"
+            className="cursor-pointer rounded-md bg-[#182019] px-6 py-3 font-[family-name:var(--font-mono)] text-xs uppercase tracking-[0.1em] text-[#F5F2EA] transition hover:bg-[#BD7B54]"
           >
-            Get Started Free →
+            Get started
           </button>
+        </div>
+      </section>
+
+      <div className="bg-[#F5F2EA] px-5 py-6 mb-10">
+        <div className="mx-auto max-w-7xl">
+          <div className="rounded-3xl border border-[#20241F]/12 bg-[#93A899]/15 px-6 py-4 shadow-sm">
+            <p className="text-sm leading-6 text-[#20241F]/75 font-medium text-left max-w-4xl">
+              Disclaimer: Not a medical diagnosis. AI-powered skincare guidance only. Consult a healthcare professional for medical advice.
+            </p>
+          </div>
         </div>
       </div>
 
-      {/* Footer */}
-      <div className="border-t border-gray-100 px-6 py-8 text-center">
-        <p className="text-sm text-gray-400">© Built with ❤️ for better skin</p>
-      </div>
-
-    </div>
+      <footer className="bg-[#F5F2EA] px-5 py-6">
+        <div className="mx-auto flex flex-col gap-4 max-w-7xl text-sm text-[#20241F]/50 md:flex-row md:items-center md:justify-between">
+          <div className="flex flex-wrap items-center gap-4">
+            <a href="/" className="text-[#20241F]/70 hover:text-[#20241F]">Home</a>
+            <button
+              type="button"
+              onClick={() => router.push('/login?redirect=/quiz')}
+              className="text-left text-[#20241F]/70 hover:text-[#20241F]"
+            >
+              Quiz
+            </button>
+            <button
+              type="button"
+              onClick={() => router.push('/login?redirect=/scan')}
+              className="text-left text-[#20241F]/70 hover:text-[#20241F]"
+            >
+              Scan
+            </button>
+            <a href="/login" className="text-[#20241F]/70 hover:text-[#20241F]">Sign in</a>
+            <a href="/register" className="text-[#20241F]/70 hover:text-[#20241F]">Sign up</a>
+          </div>
+          <p className="text-xs text-[#20241F]/60">© SkinCare AI. Built for better skin decisions.</p>
+        </div>
+      </footer>
+    </main>
   );
 }

@@ -14,7 +14,7 @@ class Scan(Base):
     # CV scores
     acne_score = Column(Float, nullable=True)
     redness_score = Column(Float, nullable=True)
-    texture_score = Column(Float, nullable=True)
+    wrinkles_score = Column(Float, nullable=True)
     dark_spots_score = Column(Float, nullable=True)
     pores_score = Column(Float, nullable=True)
     dark_circles_score = Column(Float, nullable=True)

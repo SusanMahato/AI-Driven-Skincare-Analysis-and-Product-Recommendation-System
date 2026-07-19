@@ -1,12 +1,43 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { Fraunces, IBM_Plex_Sans, IBM_Plex_Mono } from 'next/font/google';
 import { loginUser } from '@/lib/api';
 import { saveToken } from '@/lib/auth';
 
+// NOTE: for a multi-page app, hoist these into layout.tsx instead so fonts
+// aren't re-initialized per route. Left here for drop-in convenience.
+const fraunces = Fraunces({
+  subsets: ['latin'],
+  weight: ['500', '600'],
+  variable: '--font-display',
+});
+const plexSans = IBM_Plex_Sans({
+  subsets: ['latin'],
+  weight: ['400', '500'],
+  variable: '--font-body',
+});
+const plexMono = IBM_Plex_Mono({
+  subsets: ['latin'],
+  weight: ['400', '500'],
+  variable: '--font-mono',
+});
+
+// Positions computed around a circle (cx=50%, cy=48%, r=40%)
+const SCAN_TAGS = [
+  { label: 'ACNE', top: '30%', left: '38%' },
+  { label: 'WRINKLES', top: '42%', left: '75%' },
+  { label: 'DARK CIRCLES', top: '72%', left: '78%' },
+  { label: 'REDNESS', top: '88%', left: '38%' },
+  { label: 'DARK SPOTS', top: '72%', left: '10%' },
+  { label: 'PORES', top: '42%', left: '10%' },
+];
+
 export default function LoginPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirect = searchParams.get('redirect') || '/dashboard';
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -21,7 +52,8 @@ export default function LoginPage() {
     try {
       const response = await loginUser(email, password);
       saveToken(response.data.access_token);
-      router.push('/dashboard');
+      const target = redirect.startsWith('/') ? redirect : `/${redirect}`;
+      router.push(target);
     } catch (err: any) {
       setError('Invalid email or password. Please try again.');
     } finally {
@@ -30,64 +62,130 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-rose-50 flex">
-      <div className="hidden lg:flex w-1/2 bg-gradient-to-br from-rose-400 to-pink-500 items-center justify-center p-12">
-        <div className="text-white text-center">
-          <div className="text-6xl mb-6">✨</div>
-          <h2 className="text-3xl font-bold mb-4">Welcome Back</h2>
-          <p className="text-rose-100 text-lg leading-relaxed">Your personalized skincare journey continues.</p>
-          <div className="mt-8 grid grid-cols-3 gap-4 text-center">
-            <div className="bg-white/20 rounded-xl p-3">
-              <p className="text-2xl font-bold">AI</p>
-              <p className="text-xs text-rose-100">Powered</p>
-            </div>
-            <div className="bg-white/20 rounded-xl p-3">
-              <p className="text-2xl font-bold">6+</p>
-              <p className="text-xs text-rose-100">Conditions</p>
-            </div>
-            <div className="bg-white/20 rounded-xl p-3">
-              <p className="text-2xl font-bold">UV</p>
-              <p className="text-xs text-rose-100">Aware</p>
-            </div>
-          </div>
-        </div>
-      </div>
+    <div
+      className={`${fraunces.variable} ${plexSans.variable} ${plexMono.variable} min-h-screen flex bg-[#F5F2EA] font-[family-name:var(--font-body)]`}
+    >
+      {/* LEFT — atmosphere panel */}
+<div className="hidden lg:block relative w-2/5 overflow-hidden bg-[#182019]">
+  <img
+    src="/skincare-hero.jpeg"
+    alt="Skincare atmosphere"
+    className="absolute inset-0 w-full h-full object-cover grayscale contrast-110"
+  />
+  <div
+    className="absolute inset-0 mix-blend-color"
+    style={{
+      background: 'linear-gradient(160deg, #182019 15%, #93A899 60%, #C9A47E 100%)',
+    }}
+  />
+  {/* darker base + radial vignette to calm the busy shadows and lift label contrast */}
+  <div className="absolute inset-0 bg-[#182019]/40" />
+  <div
+    className="absolute inset-0"
+    style={{
+      background: 'radial-gradient(circle at 42% 58%, transparent 0%, transparent 30%, rgba(24,32,25,0.55) 85%)',
+    }}
+  />
+
+  <div className="absolute inset-0">
+    <svg
+      viewBox="0 0 400 400"
+      className="absolute top-[58%] left-[38%] -translate-x-1/2 -translate-y-1/2 w-[85%] max-w-[420px] scan-ring"
+    >
+      <circle cx="200" cy="200" r="80" fill="none" stroke="#F5F2EA" strokeOpacity="0.5" strokeWidth="1.25" />
+      <circle cx="200" cy="200" r="130" fill="none" stroke="#F5F2EA" strokeOpacity="0.35" strokeWidth="1.25" />
+      <circle
+        cx="200"
+        cy="200"
+        r="175"
+        fill="none"
+        stroke="#E7C8A6"
+        strokeOpacity="0.8"
+        strokeWidth="1.5"
+        strokeDasharray="3 9"
+        className="scan-ring-rotate"
+      />
+    </svg>
+
+    {SCAN_TAGS.map((tag) => (
+      <span
+        key={tag.label}
+        className="absolute -translate-x-1/2 -translate-y-1/2 font-[family-name:var(--font-mono)] text-[10px] tracking-[0.16em] text-[#F5F2EA] uppercase whitespace-nowrap px-2.5 py-1 rounded-full bg-[#182019]/70 border border-[#F5F2EA]/15"
+        style={{ top: tag.top, left: tag.left }}
+      >
+        {tag.label}
+      </span>
+    ))}
+  </div>
+
+  <style jsx>{`
+    .scan-ring-rotate {
+      transform-origin: 200px 200px;
+      animation: rotate-slow 40s linear infinite;
+    }
+    @keyframes rotate-slow {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .scan-ring-rotate {
+        animation: none;
+      }
+    }
+  `}</style>
+</div>
+
+      {/* RIGHT — form panel */}
       <div className="flex-1 flex items-center justify-center px-6 py-12">
-        <div className="w-full max-w-md">
-          <div className="mb-8">
-            <h1 className="text-2xl font-bold text-gray-800">Sign in to SkinCare AI</h1>
-            <p className="text-gray-500 mt-1 text-sm">Enter your credentials to continue</p>
-          </div>
-          <form onSubmit={handleLogin} className="space-y-5">
+        <div className="w-full max-w-sm">
+          <p className="font-[family-name:var(--font-mono)] text-xs tracking-[0.2em] text-[#BD7B54] uppercase mb-3">
+            Access · Skincare AI
+          </p>
+          <h1 className="font-[family-name:var(--font-display)] text-3xl font-medium text-[#20241F] mb-1">
+            Sign in
+          </h1>
+          <p className="text-sm text-[#20241F]/55 mb-8">
+            Enter your credentials to continue.
+          </p>
+
+          <form onSubmit={handleLogin} className="space-y-6">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">Email address</label>
+              <label className="block font-[family-name:var(--font-mono)] text-[11px] tracking-[0.12em] text-[#20241F]/60 uppercase mb-2">
+                Email address
+              </label>
               <input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-rose-300 bg-white"
+                className="w-full bg-transparent border-b-2 border-[#20241F]/15 px-1 py-2 text-sm text-[#20241F] focus:outline-none focus:border-[#BD7B54] transition-colors"
                 placeholder="you@example.com"
               />
             </div>
-            <div>
-              <div className="flex justify-between items-center mb-1.5">
-                <label className="block text-sm font-medium text-gray-700">Password</label>
-                <a href="/forgot-password" className="text-xs text-rose-500 hover:underline cursor-pointer">Forgot password?</a>
-              </div>
-              <div className="relative">
+
+            <div className="flex justify-between items-center mb-2">
+              <label className="font-[family-name:var(--font-mono)] text-[11px] tracking-[0.12em] text-[#20241F]/60 uppercase">
+                Password
+              </label>
+              <a href="/forgot-password" className="text-xs text-[#BD7B54] hover:underline underline-offset-2 cursor-pointer">
+                Forgot password?
+              </a>
+            </div>
+
+            <div className="relative">
                 <input
                   type={showPassword ? 'text' : 'password'}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
-                  className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-rose-300 bg-white pr-12"
+                  className="w-full bg-transparent border-b-2 border-[#20241F]/15 px-1 py-2 pr-9 text-sm text-[#20241F] focus:outline-none focus:border-[#BD7B54] transition-colors"
                   placeholder="••••••••"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 cursor-pointer p-2 rounded-full focus:outline-none focus:ring-2 focus:ring-rose-200"
+                  className="absolute right-1 top-1/2 -translate-y-1/2 text-[#20241F]/35 hover:text-[#20241F] cursor-pointer p-1"
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
                 >
                   {showPassword ? (
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
@@ -101,38 +199,60 @@ export default function LoginPage() {
                   )}
                 </button>
               </div>
-            </div>
+
             <div className="flex items-center gap-2">
-              <input type="checkbox" id="remember" checked={rememberMe} onChange={(e) => setRememberMe(e.target.checked)} className="w-4 h-4 accent-rose-500" />
-              <label htmlFor="remember" className="text-sm text-gray-600">Remember me for 30 days</label>
+              <input
+                type="checkbox"
+                id="remember"
+                checked={rememberMe}
+                onChange={(e) => setRememberMe(e.target.checked)}
+                className="w-4 h-4 accent-[#BD7B54]"
+              />
+              <label htmlFor="remember" className="text-sm text-[#20241F]/60">
+                Remember me for 30 days
+              </label>
             </div>
+
             {error && (
-              <div className="bg-red-50 border border-red-200 rounded-xl px-4 py-3">
-                <p className="text-red-600 text-sm">{error}</p>
+              <div className="border-l-4 border-red-500 bg-red-500/5 px-3 py-2">
+                <p className="font-[family-name:var(--font-mono)] text-xs text-red-600">{error}</p>
               </div>
             )}
+
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-rose-500 text-white rounded-xl py-3 text-sm font-semibold hover:bg-rose-600 transition disabled:opacity-50 shadow-sm cursor-pointer"
+              className="w-full bg-[#182019] text-[#F5F2EA] py-3 text-sm font-[family-name:var(--font-mono)] uppercase tracking-[0.12em] hover:bg-[#BD7B54] transition-colors disabled:opacity-50 cursor-pointer"
             >
-              {loading ? 'Signing in...' : 'Sign In'}
+              {loading ? 'Signing in…' : 'Sign in'}
             </button>
           </form>
-          <div className="relative my-6">
-            <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-gray-200"></div></div>
-            <div className="relative flex justify-center text-sm"><span className="bg-rose-50 px-2 text-gray-400">or continue with</span></div>
+
+          <div className="relative my-7">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-[#20241F]/12"></div>
+            </div>
+            <div className="relative flex justify-center">
+              <span className="bg-[#F5F2EA] px-3 font-[family-name:var(--font-mono)] text-[10px] tracking-[0.15em] text-[#20241F]/45 uppercase">
+                Or continue with
+              </span>
+            </div>
           </div>
+
           <a
             href="http://localhost:8000/auth/google"
-            className="w-full flex items-center justify-center gap-3 border border-gray-200 rounded-xl py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 transition cursor-pointer"
+            className="w-full flex items-center justify-center gap-3 border border-[#20241F]/15 py-3 text-sm font-medium text-[#20241F]/80 hover:bg-[#20241F]/5 transition-colors cursor-pointer"
           >
-            <img src="https://www.google.com/favicon.ico" width="18" height="18" alt="Google" />
+            <img src="https://www.google.com/favicon.ico" width="16" height="16" alt="Google logo" />
             Sign in with Google
           </a>
-          <div className="mt-6 text-center">
-            <p className="text-sm text-gray-500">Don't have an account?{' '}<a href="/register" className="text-rose-500 font-semibold hover:underline cursor-pointer">Create an account</a></p>
-          </div>
+
+          <p className="mt-8 text-sm text-[#20241F]/55">
+            New here?{' '}
+            <a href="/register" className="text-[#BD7B54] font-medium hover:underline underline-offset-2 cursor-pointer">
+              Create an account
+            </a>
+          </p>
         </div>
       </div>
     </div>

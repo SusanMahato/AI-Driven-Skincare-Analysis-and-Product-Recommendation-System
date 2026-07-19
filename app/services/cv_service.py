@@ -9,7 +9,7 @@ from typing import Dict
 import os
 
 # Model path
-MODEL_PATH = os.path.join(os.path.dirname(__file__), '..', 'models_weights', 'skin_model.pt')
+MODEL_PATH = os.path.join(os.path.dirname(__file__), '..', 'models_weights', 'skin_model_finetuned.pt')
 
 def load_model():
     model = models.efficientnet_b0(weights=None)
@@ -17,8 +17,7 @@ def load_model():
         nn.Linear(model.classifier[1].in_features, 256),
         nn.ReLU(),
         nn.Dropout(0.3),
-        nn.Linear(256, 6),
-        nn.Sigmoid()
+        nn.Linear(256, 6)
     )
     
     if os.path.exists(MODEL_PATH):
@@ -44,14 +43,13 @@ def analyze_skin(image_bytes: bytes) -> Dict[str, float]:
 
     with torch.no_grad():
         output = model(input_tensor)
-        scores = output.squeeze().tolist()
-
+        scores = torch.sigmoid(output).squeeze().tolist()
     return {
         "acne_score": round(scores[0], 3),
-        "redness_score": round(scores[1], 3),
-        "texture_score": round(scores[2], 3),
-        "dark_spots_score": round(scores[3], 3),
-        "pores_score": round(scores[4], 3),
+        "dark_spots_score": round(scores[1], 3),
+        "pores_score": round(scores[2], 3),
+        "wrinkles_score": round(scores[3], 3),
+        "redness_score": round(scores[4], 3),
         "dark_circles_score": round(scores[5], 3),
         "photo_confidence": 0.97
     }
