@@ -13,7 +13,7 @@ router = APIRouter(prefix="/auth", tags=["OAuth"])
 GOOGLE_AUTH_URL = "https://accounts.google.com/o/oauth2/v2/auth"
 GOOGLE_TOKEN_URL = "https://oauth2.googleapis.com/token"
 GOOGLE_USERINFO_URL = "https://www.googleapis.com/oauth2/v2/userinfo"
-REDIRECT_URI = "http://localhost:8000/auth/google/callback"
+REDIRECT_URI = f"{settings.BACKEND_URL}/auth/google/callback"
 
 @router.get("/google")
 def google_login():
@@ -29,12 +29,10 @@ def google_login():
 
 @router.get("/google/callback")
 async def google_callback(code: str = None, error: str = None, db: Session = Depends(get_db)):
-    # Handle user cancellation or denial
     if error or not code:
-        return RedirectResponse("http://localhost:3000/login")
-    
+        return RedirectResponse(f"{settings.FRONTEND_URL}/login")
+
     async with httpx.AsyncClient() as client:
-        # Exchange code for token
         token_response = await client.post(GOOGLE_TOKEN_URL, data={
             "client_id": settings.GOOGLE_CLIENT_ID,
             "client_secret": settings.GOOGLE_CLIENT_SECRET,
@@ -46,9 +44,8 @@ async def google_callback(code: str = None, error: str = None, db: Session = Dep
         access_token = token_data.get("access_token")
 
         if not access_token:
-            return RedirectResponse("http://localhost:3000/login")
+            return RedirectResponse(f"{settings.FRONTEND_URL}/login")
 
-        # Get user info
         user_response = await client.get(
             GOOGLE_USERINFO_URL,
             headers={"Authorization": f"Bearer {access_token}"}
@@ -60,9 +57,8 @@ async def google_callback(code: str = None, error: str = None, db: Session = Dep
     google_id = user_info.get("id")
 
     if not email:
-        return RedirectResponse("http://localhost:3000/login")
+        return RedirectResponse(f"{settings.FRONTEND_URL}/login")
 
-    # Find or create user
     user = get_user_by_email(db, email)
     if not user:
         user = User(
@@ -77,19 +73,16 @@ async def google_callback(code: str = None, error: str = None, db: Session = Dep
         db.commit()
         db.refresh(user)
 
-    # Generate JWT
     jwt_token = create_access_token(data={"sub": user.email})
-    
-    # Redirect to frontend with token
-    # Check if user has completed quiz
+
     from app.services.quiz_service import get_skin_profile
     skin_profile = get_skin_profile(db, user.id)
-    
+
     if skin_profile:
         redirect_to = "dashboard"
     else:
         redirect_to = "quiz"
-    
+
     return RedirectResponse(
-        f"http://localhost:3000/auth/callback?token={jwt_token}&redirect={redirect_to}"
+        f"{settings.FRONTEND_URL}/auth/callback?token={jwt_token}&redirect={redirect_to}"
     )

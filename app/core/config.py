@@ -3,7 +3,8 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-class Settings(BaseSettings):
+
+ class Settings(BaseSettings):
     DATABASE_URL: str
     SECRET_KEY: str
     ALGORITHM: str = "HS256"
@@ -15,6 +16,8 @@ class Settings(BaseSettings):
     RESEND_API_KEY: str
     GOOGLE_CLIENT_ID: str
     GOOGLE_CLIENT_SECRET: str
+    FRONTEND_URL: str = "http://localhost:3000"
+    BACKEND_URL: str = "http://localhost:8000"
 
     class Config:
         env_file = ".env"
