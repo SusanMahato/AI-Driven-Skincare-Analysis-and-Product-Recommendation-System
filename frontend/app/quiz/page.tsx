@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { submitQuiz } from '@/lib/api';
 import { isLoggedIn } from '@/lib/auth';
@@ -56,7 +56,7 @@ const questions = [
   },
 ];
 
-export default function QuizPage() {
+function QuizContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [current, setCurrent] = useState(0);
@@ -194,5 +194,13 @@ export default function QuizPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function QuizPage() {
+  return (
+    <Suspense>
+      <QuizContent />
+    </Suspense>
   );
 }
