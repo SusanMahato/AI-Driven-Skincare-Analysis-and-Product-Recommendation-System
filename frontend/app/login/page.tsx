@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Fraunces, IBM_Plex_Sans, IBM_Plex_Mono } from 'next/font/google';
 import { loginUser } from '@/lib/api';
@@ -8,8 +8,6 @@ import { saveToken } from '@/lib/auth';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
 
-// NOTE: for a multi-page app, hoist these into layout.tsx instead so fonts
-// aren't re-initialized per route. Left here for drop-in convenience.
 const fraunces = Fraunces({
   subsets: ['latin'],
   weight: ['500', '600'],
@@ -26,7 +24,6 @@ const plexMono = IBM_Plex_Mono({
   variable: '--font-mono',
 });
 
-// Positions computed around a circle (cx=50%, cy=48%, r=40%)
 const SCAN_TAGS = [
   { label: 'ACNE', top: '30%', left: '38%' },
   { label: 'WRINKLES', top: '42%', left: '75%' },
@@ -36,7 +33,7 @@ const SCAN_TAGS = [
   { label: 'PORES', top: '42%', left: '10%' },
 ];
 
-export default function LoginPage() {
+function LoginContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirect = searchParams.get('redirect') || '/dashboard';
@@ -67,77 +64,74 @@ export default function LoginPage() {
     <div
       className={`${fraunces.variable} ${plexSans.variable} ${plexMono.variable} min-h-screen flex bg-[#F5F2EA] font-[family-name:var(--font-body)]`}
     >
-      {/* LEFT — atmosphere panel */}
-<div className="hidden lg:block relative w-2/5 overflow-hidden bg-[#182019]">
-  <img
-    src="/skincare-hero.jpeg"
-    alt="Skincare atmosphere"
-    className="absolute inset-0 w-full h-full object-cover grayscale contrast-110"
-  />
-  <div
-    className="absolute inset-0 mix-blend-color"
-    style={{
-      background: 'linear-gradient(160deg, #182019 15%, #93A899 60%, #C9A47E 100%)',
-    }}
-  />
-  {/* darker base + radial vignette to calm the busy shadows and lift label contrast */}
-  <div className="absolute inset-0 bg-[#182019]/40" />
-  <div
-    className="absolute inset-0"
-    style={{
-      background: 'radial-gradient(circle at 42% 58%, transparent 0%, transparent 30%, rgba(24,32,25,0.55) 85%)',
-    }}
-  />
+      <div className="hidden lg:block relative w-2/5 overflow-hidden bg-[#182019]">
+        <img
+          src="/skincare-hero.jpeg"
+          alt="Skincare atmosphere"
+          className="absolute inset-0 w-full h-full object-cover grayscale contrast-110"
+        />
+        <div
+          className="absolute inset-0 mix-blend-color"
+          style={{
+            background: 'linear-gradient(160deg, #182019 15%, #93A899 60%, #C9A47E 100%)',
+          }}
+        />
+        <div className="absolute inset-0 bg-[#182019]/40" />
+        <div
+          className="absolute inset-0"
+          style={{
+            background: 'radial-gradient(circle at 42% 58%, transparent 0%, transparent 30%, rgba(24,32,25,0.55) 85%)',
+          }}
+        />
 
-  <div className="absolute inset-0">
-    <svg
-      viewBox="0 0 400 400"
-      className="absolute top-[58%] left-[38%] -translate-x-1/2 -translate-y-1/2 w-[85%] max-w-[420px] scan-ring"
-    >
-      <circle cx="200" cy="200" r="80" fill="none" stroke="#F5F2EA" strokeOpacity="0.5" strokeWidth="1.25" />
-      <circle cx="200" cy="200" r="130" fill="none" stroke="#F5F2EA" strokeOpacity="0.35" strokeWidth="1.25" />
-      <circle
-        cx="200"
-        cy="200"
-        r="175"
-        fill="none"
-        stroke="#E7C8A6"
-        strokeOpacity="0.8"
-        strokeWidth="1.5"
-        strokeDasharray="3 9"
-        className="scan-ring-rotate"
-      />
-    </svg>
+        <div className="absolute inset-0">
+          <svg
+            viewBox="0 0 400 400"
+            className="absolute top-[58%] left-[38%] -translate-x-1/2 -translate-y-1/2 w-[85%] max-w-[420px] scan-ring"
+          >
+            <circle cx="200" cy="200" r="80" fill="none" stroke="#F5F2EA" strokeOpacity="0.5" strokeWidth="1.25" />
+            <circle cx="200" cy="200" r="130" fill="none" stroke="#F5F2EA" strokeOpacity="0.35" strokeWidth="1.25" />
+            <circle
+              cx="200"
+              cy="200"
+              r="175"
+              fill="none"
+              stroke="#E7C8A6"
+              strokeOpacity="0.8"
+              strokeWidth="1.5"
+              strokeDasharray="3 9"
+              className="scan-ring-rotate"
+            />
+          </svg>
 
-    {SCAN_TAGS.map((tag) => (
-      <span
-        key={tag.label}
-        className="absolute -translate-x-1/2 -translate-y-1/2 font-[family-name:var(--font-mono)] text-[10px] tracking-[0.16em] text-[#F5F2EA] uppercase whitespace-nowrap px-2.5 py-1 rounded-full bg-[#182019]/70 border border-[#F5F2EA]/15"
-        style={{ top: tag.top, left: tag.left }}
-      >
-        {tag.label}
-      </span>
-    ))}
-  </div>
+          {SCAN_TAGS.map((tag) => (
+            <span
+              key={tag.label}
+              className="absolute -translate-x-1/2 -translate-y-1/2 font-[family-name:var(--font-mono)] text-[10px] tracking-[0.16em] text-[#F5F2EA] uppercase whitespace-nowrap px-2.5 py-1 rounded-full bg-[#182019]/70 border border-[#F5F2EA]/15"
+              style={{ top: tag.top, left: tag.left }}
+            >
+              {tag.label}
+            </span>
+          ))}
+        </div>
 
-  <style jsx>{`
-    .scan-ring-rotate {
-      transform-origin: 200px 200px;
-      animation: rotate-slow 40s linear infinite;
-    }
-    @keyframes rotate-slow {
-      from { transform: rotate(0deg); }
-      to { transform: rotate(360deg); }
-    }
-    @media (prefers-reduced-motion: reduce) {
-      .scan-ring-rotate {
-        animation: none;
-      }
-    }
-  `}</style>
-</div>
+        <style jsx>{`
+          .scan-ring-rotate {
+            transform-origin: 200px 200px;
+            animation: rotate-slow 40s linear infinite;
+          }
+          @keyframes rotate-slow {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+          }
+          @media (prefers-reduced-motion: reduce) {
+            .scan-ring-rotate {
+              animation: none;
+            }
+          }
+        `}</style>
+      </div>
 
-      {/* RIGHT — form panel */}
       <div className="flex-1 flex items-center justify-center px-6 py-12">
         <div className="w-full max-w-sm">
           <p className="font-[family-name:var(--font-mono)] text-xs tracking-[0.2em] text-[#BD7B54] uppercase mb-3">
@@ -241,7 +235,7 @@ export default function LoginPage() {
             </div>
           </div>
 
-          <a
+          
             href={`${API_BASE_URL}/auth/google`}
             className="w-full flex items-center justify-center gap-3 border border-[#20241F]/15 py-3 text-sm font-medium text-[#20241F]/80 hover:bg-[#20241F]/5 transition-colors cursor-pointer"
           >
@@ -258,5 +252,13 @@ export default function LoginPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense>
+      <LoginContent />
+    </Suspense>
   );
 }
