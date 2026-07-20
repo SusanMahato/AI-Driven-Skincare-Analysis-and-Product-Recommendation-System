@@ -241,7 +241,7 @@ export default function LoginPage() {
             </div>
           </div>
 
-          
+          <a
             href={`${API_BASE_URL}/auth/google`}
             className="w-full flex items-center justify-center gap-3 border border-[#20241F]/15 py-3 text-sm font-medium text-[#20241F]/80 hover:bg-[#20241F]/5 transition-colors cursor-pointer"
           >
