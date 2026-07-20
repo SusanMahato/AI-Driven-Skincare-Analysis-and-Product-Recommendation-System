@@ -4,6 +4,8 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import axios from 'axios';
 
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
+
 export default function ForgotPasswordPage() {
   const router = useRouter();
   const [step, setStep] = useState<'email' | 'otp'>('email');
@@ -19,7 +21,7 @@ export default function ForgotPasswordPage() {
     setLoading(true);
     setError('');
     try {
-      await axios.post('http://127.0.0.1:8000/auth/forgot-password', { email });
+      await axios.post(`${API_BASE_URL}/auth/forgot-password`, { email });
       setStep('otp');
     } catch (err) {
       setError('Something went wrong. Please try again.');
@@ -33,7 +35,7 @@ export default function ForgotPasswordPage() {
     setLoading(true);
     setError('');
     try {
-      await axios.post('http://127.0.0.1:8000/auth/reset-password', {
+      await axios.post(`${API_BASE_URL}/auth/reset-password`, {
         email,
         otp,
         new_password: newPassword

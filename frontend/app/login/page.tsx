@@ -6,6 +6,8 @@ import { Fraunces, IBM_Plex_Sans, IBM_Plex_Mono } from 'next/font/google';
 import { loginUser } from '@/lib/api';
 import { saveToken } from '@/lib/auth';
 
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
+
 // NOTE: for a multi-page app, hoist these into layout.tsx instead so fonts
 // aren't re-initialized per route. Left here for drop-in convenience.
 const fraunces = Fraunces({
@@ -239,8 +241,8 @@ export default function LoginPage() {
             </div>
           </div>
 
-          <a
-            href="http://localhost:8000/auth/google"
+          
+            href={`${API_BASE_URL}/auth/google`}
             className="w-full flex items-center justify-center gap-3 border border-[#20241F]/15 py-3 text-sm font-medium text-[#20241F]/80 hover:bg-[#20241F]/5 transition-colors cursor-pointer"
           >
             <img src="https://www.google.com/favicon.ico" width="16" height="16" alt="Google logo" />

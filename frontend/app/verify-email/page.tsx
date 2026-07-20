@@ -4,6 +4,8 @@ import { useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Suspense } from 'react';
 
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
+
 function VerifyEmailContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -20,7 +22,7 @@ function VerifyEmailContent() {
 
   const verifyEmail = async (token: string) => {
     try {
-      const response = await fetch(`http://127.0.0.1:8000/auth/verify-email?token=${token}`);
+      const response = await fetch(`${API_BASE_URL}/auth/verify-email?token=${token}`);
       if (response.ok) {
         setStatus('success');
         setTimeout(() => router.push('/login'), 3000);
