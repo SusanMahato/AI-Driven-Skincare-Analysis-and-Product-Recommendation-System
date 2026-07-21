@@ -8,3 +8,4 @@ __pycache__/
 uploaded_scans/
 scripts/data/
 app/models_weights/*.pt
+!app/models_weights/skin_model_finetuned.pt
