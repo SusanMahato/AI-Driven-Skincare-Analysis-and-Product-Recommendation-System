@@ -5,7 +5,7 @@ resend.api_key = settings.RESEND_API_KEY
 
 def send_verification_email(email: str, full_name: str, token: str):
     
-    verification_url = f"http://192.168.18.129:3000/verify-email?token={token}"
+    verification_url = f"{settings.FRONTEND_URL}/verify-email?token={token}"
     
     resend.Emails.send({
         "from": "SkinCare AI <noreply@susanmahato.com.np>",
