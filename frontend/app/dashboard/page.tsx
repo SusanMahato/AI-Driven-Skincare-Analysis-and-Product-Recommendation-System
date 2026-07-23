@@ -7,6 +7,8 @@ import { isLoggedIn, removeToken } from '@/lib/auth';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import ProductTabs from '@/components/ProductTabs';
 
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
+
 export default function DashboardPage() {
   const router = useRouter();
   const [recommendation, setRecommendation] = useState<any>(null);
@@ -356,7 +358,7 @@ export default function DashboardPage() {
                   >
                     {scan.photo_url ? (
                       <img
-                        src={`http://127.0.0.1:8000${scan.photo_url}`}
+                        src={`${API_BASE_URL}${scan.photo_url}`}
                         alt="Scan"
                         className="w-14 h-14 object-cover rounded-lg border border-gray-200 flex-shrink-0"
                       />
@@ -400,7 +402,7 @@ export default function DashboardPage() {
 
               {selectedScan.photo_url ? (
                 <img
-                  src={`http://127.0.0.1:8000${selectedScan.photo_url}`}
+                  src={`${API_BASE_URL}${selectedScan.photo_url}`}
                   alt="Scan"
                   className="w-full max-h-80 object-contain rounded-xl border border-gray-200 mb-4 bg-gray-50"
                 />
