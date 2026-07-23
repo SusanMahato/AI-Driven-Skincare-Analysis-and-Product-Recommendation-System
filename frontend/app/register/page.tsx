@@ -50,7 +50,7 @@ export default function RegisterPage() {
 
     try {
       await registerUser({ full_name: fullName, email, password });
-      router.push('/login');
+      router.push(`/verify-email?email=${encodeURIComponent(email)}`);
     } catch (err: any) {
       if (err.response?.data?.detail === 'Email already registered') {
         setError('This email is already registered. Please login.');
