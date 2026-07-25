@@ -1,10 +1,20 @@
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, field_validator
 from typing import Optional
+from email_validator import validate_email, EmailNotValidError
 
 class UserRegister(BaseModel):
     full_name: str
     email: EmailStr
     password: str
+
+    @field_validator('email')
+    @classmethod
+    def validate_email_deliverable(cls, v):
+        try:
+            validate_email(v, check_deliverability=True)
+        except EmailNotValidError:
+            raise ValueError('Email domain does not appear to accept mail. Please use a valid email address.')
+        return v
 
 class UserLogin(BaseModel):
     email: EmailStr
@@ -25,3 +35,4 @@ class UserResponse(BaseModel):
 
     class Config:
         from_attributes = True
+        

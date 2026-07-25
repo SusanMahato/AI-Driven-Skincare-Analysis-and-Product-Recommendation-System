@@ -27,3 +27,6 @@ class User(Base):
     verification_token = Column(String, nullable=True)
     reset_otp = Column(String, nullable=True)
     reset_otp_expires = Column(DateTime(timezone=True), nullable=True)
+    verification_otp = Column(String, nullable=True)
+    verification_otp_expires = Column(DateTime(timezone=True), nullable=True)
+    

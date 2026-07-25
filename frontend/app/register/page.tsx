@@ -42,6 +42,7 @@ export default function RegisterPage() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [registrationSuccess, setRegistrationSuccess] = useState(false);
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -50,7 +51,8 @@ export default function RegisterPage() {
 
     try {
       await registerUser({ full_name: fullName, email, password });
-      router.push(`/verify-email?email=${encodeURIComponent(email)}`);
+      setRegistrationSuccess(true);
+      setTimeout(() => router.push('/login'), 3000);
     } catch (err: any) {
       if (err.response?.data?.detail === 'Email already registered') {
         setError('This email is already registered. Please login.');
@@ -61,6 +63,57 @@ export default function RegisterPage() {
       setLoading(false);
     }
   };
+
+  if (registrationSuccess) {
+    return (
+      <div
+        className={`${fraunces.variable} ${plexSans.variable} ${plexMono.variable} min-h-screen flex bg-[#F5F2EA] font-[family-name:var(--font-body)]`}
+      >
+        <div className="hidden lg:block relative w-2/5 overflow-hidden bg-[#182019]">
+          <img
+            src="/skincare-hero.jpeg"
+            alt="Skincare atmosphere"
+            className="absolute inset-0 w-full h-full object-cover grayscale contrast-110"
+          />
+          <div
+            className="absolute inset-0 mix-blend-color"
+            style={{
+              background: 'linear-gradient(160deg, #182019 15%, #93A899 60%, #C9A47E 100%)',
+            }}
+          />
+        </div>
+
+        <div className="flex-1 flex items-center justify-center px-6 py-12">
+          <div className="w-full max-w-sm">
+            <div className="text-center">
+              <p className="text-5xl mb-6">✅</p>
+              <h1 className="font-[family-name:var(--font-display)] text-3xl font-medium text-[#20241F] mb-4">
+                Account Created!
+              </h1>
+              <p className="text-sm text-[#20241F]/70 mb-2">
+                We've sent a verification link to:
+              </p>
+              <p className="font-medium text-[#20241F] mb-6">{email}</p>
+              <div className="bg-[#F5F2EA] border border-[#BD7B54]/20 rounded-lg px-4 py-4 mb-6">
+                <p className="text-sm text-[#20241F]/70">
+                  Check your email and click the verification link to activate your account. The link expires in 24 hours.
+                </p>
+              </div>
+              <p className="text-xs text-[#20241F]/50 mb-4">
+                Redirecting to login in a few seconds...
+              </p>
+              <button
+                onClick={() => router.push('/login')}
+                className="text-sm font-[family-name:var(--font-mono)] text-[#BD7B54] hover:text-[#20241F] transition-colors"
+              >
+                Go to Login
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div
