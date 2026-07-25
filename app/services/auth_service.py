@@ -20,20 +20,15 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
 def get_user_by_email(db: Session, email: str):
     return db.query(User).filter(User.email == email).first()
 
-def generate_verification_token() -> str:
-    return secrets.token_urlsafe(32)
-
 def create_user(db: Session, user_data: UserRegister):
     hashed = hash_password(user_data.password)
-    verification_token = generate_verification_token()
-    expires = datetime.utcnow() + timedelta(hours=24)
+    verification_token = secrets.token_urlsafe(32)
 
     new_user = User(
         full_name=user_data.full_name,
         email=user_data.email,
         hashed_password=hashed,
         verification_token=verification_token,
-        verification_otp_expires=expires,
         is_verified=False
     )
     db.add(new_user)
@@ -58,17 +53,13 @@ def verify_email_token(db: Session, token: str):
     user = db.query(User).filter(User.verification_token == token).first()
     if not user:
         return None
-    if user.verification_otp_expires and user.verification_otp_expires.replace(tzinfo=None) < datetime.utcnow():
-        return None
-
     user.is_verified = True
     user.verification_token = None
-    user.verification_otp_expires = None
     db.commit()
     db.refresh(user)
     return user
 
-def generate_otp_reset() -> str:
+def generate_otp() -> str:
     return str(random.randint(100000, 999999))
 
 def create_password_reset_otp(db: Session, email: str):

@@ -24,9 +24,6 @@ class ResetPasswordRequest(BaseModel):
     otp: str
     new_password: str
 
-class VerifyEmailRequest(BaseModel):
-    token: str
-
 @router.post("/register", response_model=UserResponse)
 def register(user_data: UserRegister, db: Session = Depends(get_db)):
     existing_user = get_user_by_email(db, user_data.email)
@@ -60,13 +57,13 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = 
     access_token = create_access_token(data={"sub": user.email})
     return {"access_token": access_token, "token_type": "bearer"}
 
-@router.post("/verify-email")
-def verify_email(request: VerifyEmailRequest, db: Session = Depends(get_db)):
-    user = verify_email_token(db, request.token)
+@router.get("/verify-email")
+def verify_email(token: str, db: Session = Depends(get_db)):
+    user = verify_email_token(db, token)
     if not user:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Invalid or expired verification link"
+            detail="Invalid or expired verification token"
         )
     return {"message": "Email verified successfully. You can now login."}
 
