@@ -1,5 +1,7 @@
 'use client';
 
+import Image from 'next/image';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
 const steps = [
@@ -32,9 +34,15 @@ export default function LandingPage() {
             SkinCare AI
           </button>
           <nav className="hidden items-center gap-8 text-sm font-medium text-[#20241F]/60 md:flex">
-            <a href="#how-it-works" className="hover:text-[#20241F]">How it works</a>
-            <a href="#analysis" className="hover:text-[#20241F]">Analysis</a>
-            <a href="#recommendations" className="hover:text-[#20241F]">Recommendations</a>
+            <Link href="#how-it-works" className="hover:text-[#20241F]">
+              How it works
+            </Link>
+            <Link href="#analysis" className="hover:text-[#20241F]">
+              Analysis
+            </Link>
+            <Link href="#recommendations" className="hover:text-[#20241F]">
+              Recommendations
+            </Link>
           </nav>
           <div className="flex items-center gap-2">
             <button
@@ -53,23 +61,27 @@ export default function LandingPage() {
         </div>
       </header>
 
-      {/* HERO — untouched structure, original photo, no overlay treatment */}
+      {/* HERO */}
       <section className="relative overflow-hidden border-b border-[#20241F]/10">
-        <img
+        <Image
           src="/landing-hero.jpeg"
           alt="Person applying skincare cream"
-          loading="eager"
-          className="absolute inset-0 h-full w-full object-cover object-[85%_50%]"
+          fill
+          priority
+          className="absolute inset-0 object-cover object-[70%_30%] md:object-[85%_50%]"
         />
-        <div className="relative mx-auto grid min-h-[720px] max-w-7xl items-center gap-10 px-5 py-20 lg:grid-cols-1">
+        {/* gradient overlay for text legibility */}
+        <div className="absolute inset-0 bg-gradient-to-b from-[#F5F2EA]/95 via-[#F5F2EA]/70 to-[#F5F2EA]/20 md:bg-gradient-to-r md:from-[#F5F2EA]/95 md:via-[#F5F2EA]/60 md:to-transparent" />
+
+        <div className="relative mx-auto grid min-h-[600px] max-w-7xl items-center gap-10 px-5 py-16 md:min-h-[720px] md:py-20 lg:grid-cols-1">
           <div className="max-w-2xl">
             <p className="mb-5 font-[family-name:var(--font-mono)] text-xs font-bold uppercase tracking-[0.26em] text-[#BD7B54]">
               AI skin analysis and recommendations
             </p>
-            <h1 className="max-w-xl font-[family-name:var(--font-display)] text-5xl font-medium leading-[1.02] text-[#20241F] md:text-7xl">
+            <h1 className="max-w-xl font-[family-name:var(--font-display)] text-4xl font-medium leading-[1.05] text-[#20241F] sm:text-5xl md:text-7xl">
               Understand your skin before choosing products.
             </h1>
-            <p className="mt-6 max-w-xl text-lg leading-8 text-[#20241F]/70">
+            <p className="mt-6 max-w-xl text-base leading-7 text-[#20241F]/70 sm:text-lg sm:leading-8">
               Upload a face photo, complete a short skin quiz, and get concern scores plus product recommendations matched to your skin profile and local weather.
             </p>
             <div className="mt-9 flex flex-col gap-3 sm:flex-row">
@@ -181,10 +193,10 @@ export default function LandingPage() {
         </div>
       </section>
 
-      <div className="bg-[#F5F2EA] px-5 py-6 mb-10">
+      <div className="mb-10 bg-[#F5F2EA] px-5 py-6">
         <div className="mx-auto max-w-7xl">
           <div className="rounded-3xl border border-[#20241F]/12 bg-[#93A899]/15 px-6 py-4 shadow-sm">
-            <p className="text-sm leading-6 text-[#20241F]/75 font-medium text-left max-w-4xl">
+            <p className="max-w-4xl text-left text-sm font-medium leading-6 text-[#20241F]/75">
               Disclaimer: Not a medical diagnosis. AI-powered skincare guidance only. Consult a healthcare professional for medical advice.
             </p>
           </div>
@@ -192,9 +204,11 @@ export default function LandingPage() {
       </div>
 
       <footer className="bg-[#F5F2EA] px-5 py-6">
-        <div className="mx-auto flex flex-col gap-4 max-w-7xl text-sm text-[#20241F]/50 md:flex-row md:items-center md:justify-between">
+        <div className="mx-auto flex max-w-7xl flex-col gap-4 text-sm text-[#20241F]/50 md:flex-row md:items-center md:justify-between">
           <div className="flex flex-wrap items-center gap-4">
-            <a href="/" className="text-[#20241F]/70 hover:text-[#20241F]">Home</a>
+            <Link href="/" className="text-[#20241F]/70 hover:text-[#20241F]">
+              Home
+            </Link>
             <button
               type="button"
               onClick={() => router.push('/login?redirect=/quiz')}
@@ -209,8 +223,12 @@ export default function LandingPage() {
             >
               Scan
             </button>
-            <a href="/login" className="text-[#20241F]/70 hover:text-[#20241F]">Sign in</a>
-            <a href="/register" className="text-[#20241F]/70 hover:text-[#20241F]">Sign up</a>
+            <Link href="/login" className="text-[#20241F]/70 hover:text-[#20241F]">
+              Sign in
+            </Link>
+            <Link href="/register" className="text-[#20241F]/70 hover:text-[#20241F]">
+              Sign up
+            </Link>
           </div>
           <p className="text-xs text-[#20241F]/60">© SkinCare AI. Built for better skin decisions.</p>
         </div>
