@@ -42,7 +42,10 @@ async def analyze(
     photo_url = f"/uploaded_scans/{unique_filename}"
 
     # Run CV analysis
-    cv_scores = analyze_skin(image_bytes)
+    cv_scores = analyze_skin(
+    image_bytes,
+    photo_confidence=quality["confidence"]
+)
 
     # Get weather data
     try:
