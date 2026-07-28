@@ -47,6 +47,8 @@ export const analyzeScan = (file: File, lat: number, lon: number) => {
 };
 
 export const getScanHistory = () => api.get('/scan/history');
+export const compareScans = (scanId1: number, scanId2: number) =>
+  api.get(`/scan/compare?scan_id_1=${scanId1}&scan_id_2=${scanId2}`);
 
 // Recommendation
 export const getRecommendation = () => api.get('/recommendation/latest');

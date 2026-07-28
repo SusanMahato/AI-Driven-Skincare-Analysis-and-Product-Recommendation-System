@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, status
+from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, status, Query
 from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.core.dependencies import get_current_user
@@ -13,6 +13,19 @@ router = APIRouter(prefix="/scan", tags=["Scan"])
 
 UPLOAD_DIR = os.path.join(os.path.dirname(__file__), '..', '..', '..', 'uploaded_scans')
 os.makedirs(UPLOAD_DIR, exist_ok=True)
+
+# Config: score-scale is 0.0–1.0, higher = more severe.
+# A delta smaller than this magnitude is treated as noise, not real change.
+COMPARISON_THRESHOLD = 0.03
+
+CONDITION_FIELDS = [
+    "acne_score",
+    "redness_score",
+    "wrinkles_score",
+    "dark_spots_score",
+    "pores_score",
+    "dark_circles_score",
+]
 
 @router.post("/analyze")
 async def analyze(
@@ -97,3 +110,92 @@ def get_scan_history(
         Scan.user_id == current_user.id
     ).order_by(Scan.created_at.desc()).all()
     return scans
+
+@router.get("/compare")
+def compare_scans(
+    scan_id_1: int = Query(...),
+    scan_id_2: int = Query(...),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    if scan_id_1 == scan_id_2:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Please select two different scans to compare."
+        )
+
+    scans = db.query(Scan).filter(
+        Scan.id.in_([scan_id_1, scan_id_2]),
+        Scan.user_id == current_user.id
+    ).all()
+
+    if len(scans) != 2:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="One or both scans were not found for this user."
+        )
+
+    # Order by date regardless of which scan_id was passed first
+    scans_sorted = sorted(scans, key=lambda s: s.created_at)
+    older_scan, newer_scan = scans_sorted[0], scans_sorted[1]
+
+    comparisons = []
+    improved_count = 0
+    worsened_count = 0
+    unchanged_count = 0
+
+    for field in CONDITION_FIELDS:
+        older_value = getattr(older_scan, field)
+        newer_value = getattr(newer_scan, field)
+        condition_name = field.replace("_score", "")
+
+        if older_value is None or newer_value is None:
+            comparisons.append({
+                "condition": condition_name,
+                "older_score": older_value,
+                "newer_score": newer_value,
+                "delta": None,
+                "status": "no_data"
+            })
+            continue
+
+        delta = newer_value - older_value  # negative delta = improvement (severity dropped)
+
+        if delta <= -COMPARISON_THRESHOLD:
+            status_label = "improved"
+            improved_count += 1
+        elif delta >= COMPARISON_THRESHOLD:
+            status_label = "worsened"
+            worsened_count += 1
+        else:
+            status_label = "no_significant_change"
+            unchanged_count += 1
+
+        comparisons.append({
+            "condition": condition_name,
+            "older_score": round(older_value, 4),
+            "newer_score": round(newer_value, 4),
+            "delta": round(delta, 4),
+            "status": status_label
+        })
+
+    return {
+        "older_scan": {
+            "id": older_scan.id,
+            "created_at": older_scan.created_at,
+            "photo_url": older_scan.photo_url
+        },
+        "newer_scan": {
+            "id": newer_scan.id,
+            "created_at": newer_scan.created_at,
+            "photo_url": newer_scan.photo_url
+        },
+        "comparisons": comparisons,
+        "summary": {
+            "improved": improved_count,
+            "worsened": worsened_count,
+            "no_significant_change": unchanged_count,
+            "threshold_used": COMPARISON_THRESHOLD
+        }
+    }
+    
