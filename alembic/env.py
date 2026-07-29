@@ -10,7 +10,7 @@ load_dotenv()
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from app.models import User, SkinProfile, Scan
+from app.models import User, SkinProfile, Scan, JournalEntry, Product, Ingredient
 from app.core.database import Base
 
 config = context.config
@@ -55,3 +55,4 @@ if context.is_offline_mode():
     run_migrations_offline()
 else:
     run_migrations_online()
+    

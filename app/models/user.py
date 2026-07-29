@@ -24,6 +24,7 @@ class User(Base):
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
     skin_profile = relationship("SkinProfile", back_populates="user", uselist=False)
     scans = relationship("Scan", back_populates="user")
+    journal_entries = relationship("JournalEntry", back_populates="user")
     verification_token = Column(String, nullable=True)
     reset_otp = Column(String, nullable=True)
     reset_otp_expires = Column(DateTime(timezone=True), nullable=True)

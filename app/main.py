@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-from app.api.routes import auth, quiz, weather, scan, recommendation, oauth
+from app.api.routes import auth, quiz, weather, scan, recommendation, oauth, journal
 from app.core.config import settings
 import os
 
@@ -34,6 +34,7 @@ app.include_router(weather.router)
 app.include_router(scan.router)
 app.include_router(recommendation.router)
 app.include_router(oauth.router)
+app.include_router(journal.router)
 
 @app.get("/")
 def root():
