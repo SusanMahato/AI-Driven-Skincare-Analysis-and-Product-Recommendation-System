@@ -50,6 +50,19 @@ export const getScanHistory = () => api.get('/scan/history');
 export const compareScans = (scanId1: number, scanId2: number) =>
   api.get(`/scan/compare?scan_id_1=${scanId1}&scan_id_2=${scanId2}`);
 
+// Journal
+export const upsertJournalEntry = (data: {
+  date: string;
+  sleep_hours?: number | null;
+  water_intake_liters?: number | null;
+  stress_level?: number | null;
+  exercise_minutes?: number | null;
+  notes?: string | null;
+}) => api.post('/journal/entry', data);
+
+export const getJournalEntries = () => api.get('/journal/entries');
+export const getJournalInsights = () => api.get('/journal/insights');
+
 // Recommendation
 export const getRecommendation = () => api.get('/recommendation/latest');
 export const getProductRecommendations = () => api.get('/recommendation/products');

@@ -6,6 +6,7 @@ import { getRecommendation, getScanHistory, getProductRecommendations, compareSc
 import { isLoggedIn, removeToken } from '@/lib/auth';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import ProductTabs from '@/components/ProductTabs';
+import JournalTab from '@/components/JournalTab';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
 
@@ -204,7 +205,7 @@ export default function DashboardPage() {
 
         {/* Tabs */}
         <div className="flex gap-2 mb-6 flex-wrap">
-          {['overview', 'recommendations', 'progress', 'history'].map((tab) => (
+          {['overview', 'recommendations', 'progress', 'history', 'journal'].map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
@@ -214,7 +215,7 @@ export default function DashboardPage() {
                   : 'bg-white text-gray-600 border border-gray-200 hover:border-rose-200'
               }`}
             >
-              {tab === 'recommendations' ? '🧴 Products' : tab}
+              {tab === 'recommendations' ? '🧴 Products' : tab === 'journal' ? '📔 Journal' : tab}
             </button>
           ))}
         </div>
@@ -518,6 +519,9 @@ export default function DashboardPage() {
             )}
           </div>
         )}
+
+        {/* Journal Tab */}
+        {activeTab === 'journal' && <JournalTab />}
       </div>
 
       {/* Scan Comparison Result Modal */}
