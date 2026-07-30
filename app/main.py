@@ -10,8 +10,6 @@ from app.core.config import settings
 import os
 import logging
 
-# Basic logging setup — logs to console, which Render captures automatically
-# in its deploy/service logs. No extra infrastructure needed.
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s [%(levelname)s] %(message)s"
@@ -36,6 +34,21 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Fields whose values should never appear in server logs, even on validation failure.
+SENSITIVE_FIELDS = {"password", "new_password", "otp"}
+
+
+def _redact_validation_errors(errors: list) -> list:
+    """Prevents sensitive field values (passwords, OTPs) from being logged in plaintext."""
+    redacted = []
+    for err in errors:
+        err_copy = dict(err)
+        loc = err_copy.get("loc", ())
+        if any(field in loc for field in SENSITIVE_FIELDS):
+            err_copy["input"] = "[REDACTED]"
+        redacted.append(err_copy)
+    return redacted
 
 
 @app.exception_handler(Exception)
@@ -72,9 +85,11 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
     """
     Pydantic/request validation errors (422) — these are already safe and
     useful to the client (e.g. "password must be at least 8 characters"),
-    so they're passed through in FastAPI's normal shape, just logged too.
+    so they're passed through in FastAPI's normal shape. Logged server-side
+    too, but with sensitive field values (password, otp) redacted first.
     """
-    logger.warning(f"Validation error on {request.method} {request.url.path}: {exc.errors()}")
+    safe_errors = _redact_validation_errors(exc.errors())
+    logger.warning(f"Validation error on {request.method} {request.url.path}: {safe_errors}")
     return JSONResponse(
         status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
         content=jsonable_encoder({"detail": exc.errors()}),
