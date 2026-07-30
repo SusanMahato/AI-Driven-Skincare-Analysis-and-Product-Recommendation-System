@@ -7,14 +7,9 @@ from app.models.scan import Scan
 from app.services.cv_service import analyze_skin, check_photo_quality
 from app.services.weather_service import get_full_weather
 from PIL import Image
-import pillow_heif
 import os
 import uuid
 import io
-
-# Registers HEIC/HEIF support with Pillow globally — after this, Image.open()
-# transparently handles .heic/.heif files anywhere in the app.
-pillow_heif.register_heif_opener()
 
 router = APIRouter(prefix="/scan", tags=["Scan"])
 
@@ -35,22 +30,24 @@ CONDITION_FIELDS = [
 ]
 
 # --- File upload validation config ---
-# "application/octet-stream" is deliberately NOT in this whitelist — it's not a
-# real image MIME type, it's a generic fallback some browsers report for HEIC
-# uploads when they can't classify the file confidently. It's handled as a
-# special case in validate_uploaded_image() below, not trusted outright.
+# HEIC/HEIF support was attempted via pillow-heif but reverted: it requires
+# compiling against libheif, and Render's build image ships a libheif version
+# too old for pillow-heif 0.18.0 (missing a required function), causing the
+# build to fail. Fixing this would require a custom Dockerfile/build script to
+# install a newer libheif-dev — judged too risky this close to the deadline.
+# Documented as future work. JPG/PNG/WEBP covers the vast majority of cases;
+# iPhone users on default camera settings should switch to "Most Compatible"
+# (Settings > Camera > Formats) or the browser/OS may auto-convert on upload.
 ALLOWED_CONTENT_TYPES = {
     "image/jpeg", "image/png", "image/webp",
-    "image/heic", "image/heif",
 }
-ALLOWED_PIL_FORMATS = {"JPEG", "PNG", "WEBP", "HEIF"}
+ALLOWED_PIL_FORMATS = {"JPEG", "PNG", "WEBP"}
 MAX_UPLOAD_SIZE_BYTES = 20 * 1024 * 1024  # 20 MB
 
 FORMAT_TO_EXTENSION = {
     "JPEG": ".jpg",
     "PNG": ".png",
     "WEBP": ".webp",
-    "HEIF": ".heic",
 }
 
 
@@ -60,19 +57,12 @@ def validate_uploaded_image(file: UploadFile, image_bytes: bytes) -> str:
     Returns the safe file extension to use when saving, derived from the
     actual verified image content — never from the client-supplied filename.
     """
-    # 1. Content-type check — soft filter only. Rejects obviously wrong types
-    # immediately (e.g. application/pdf, application/zip). "application/octet-stream"
-    # is allowed to pass through to Pillow's authoritative verification below,
-    # since it's a common fallback MIME type for HEIC across browsers.
-    if file.content_type:
-        if (
-            file.content_type not in ALLOWED_CONTENT_TYPES
-            and file.content_type != "application/octet-stream"
-        ):
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Unsupported file type. Please upload a JPG, PNG, WEBP, or HEIC image."
-            )
+    # 1. Content-type check
+    if file.content_type and file.content_type not in ALLOWED_CONTENT_TYPES:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Unsupported file type. Please upload a JPG, PNG, or WEBP image."
+        )
 
     # 2. Size check
     if len(image_bytes) == 0:
@@ -111,7 +101,7 @@ def validate_uploaded_image(file: UploadFile, image_bytes: bytes) -> str:
     if detected_format not in ALLOWED_PIL_FORMATS:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Unsupported image format. Please upload a JPG, PNG, WEBP, or HEIC image."
+            detail="Unsupported image format. Please upload a JPG, PNG, or WEBP image."
         )
 
     return FORMAT_TO_EXTENSION[detected_format]
@@ -225,7 +215,6 @@ def compare_scans(
             detail="One or both scans were not found for this user."
         )
 
-    # Order by date regardless of which scan_id was passed first
     scans_sorted = sorted(scans, key=lambda s: s.created_at)
     older_scan, newer_scan = scans_sorted[0], scans_sorted[1]
 
@@ -249,7 +238,7 @@ def compare_scans(
             })
             continue
 
-        delta = newer_value - older_value  # negative delta = improvement (severity dropped)
+        delta = newer_value - older_value
 
         if delta <= -COMPARISON_THRESHOLD:
             status_label = "improved"
