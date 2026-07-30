@@ -7,9 +7,14 @@ from app.models.scan import Scan
 from app.services.cv_service import analyze_skin, check_photo_quality
 from app.services.weather_service import get_full_weather
 from PIL import Image
+import pillow_heif
 import os
 import uuid
 import io
+
+# Registers HEIC/HEIF support with Pillow globally — after this, Image.open()
+# transparently handles .heic/.heif files anywhere in the app.
+pillow_heif.register_heif_opener()
 
 router = APIRouter(prefix="/scan", tags=["Scan"])
 
@@ -30,13 +35,22 @@ CONDITION_FIELDS = [
 ]
 
 # --- File upload validation config ---
-ALLOWED_CONTENT_TYPES = {"image/jpeg", "image/png"}
-ALLOWED_PIL_FORMATS = {"JPEG", "PNG"}
-MAX_UPLOAD_SIZE_BYTES = 5 * 1024 * 1024  # 5 MB
+# "application/octet-stream" is deliberately NOT in this whitelist — it's not a
+# real image MIME type, it's a generic fallback some browsers report for HEIC
+# uploads when they can't classify the file confidently. It's handled as a
+# special case in validate_uploaded_image() below, not trusted outright.
+ALLOWED_CONTENT_TYPES = {
+    "image/jpeg", "image/png", "image/webp",
+    "image/heic", "image/heif",
+}
+ALLOWED_PIL_FORMATS = {"JPEG", "PNG", "WEBP", "HEIF"}
+MAX_UPLOAD_SIZE_BYTES = 20 * 1024 * 1024  # 20 MB
 
 FORMAT_TO_EXTENSION = {
     "JPEG": ".jpg",
     "PNG": ".png",
+    "WEBP": ".webp",
+    "HEIF": ".heic",
 }
 
 
@@ -46,12 +60,19 @@ def validate_uploaded_image(file: UploadFile, image_bytes: bytes) -> str:
     Returns the safe file extension to use when saving, derived from the
     actual verified image content — never from the client-supplied filename.
     """
-    # 1. Content-type check (client-declared, spoofable, but cheap first filter)
-    if file.content_type not in ALLOWED_CONTENT_TYPES:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Unsupported file type. Please upload a JPG or PNG image."
-        )
+    # 1. Content-type check — soft filter only. Rejects obviously wrong types
+    # immediately (e.g. application/pdf, application/zip). "application/octet-stream"
+    # is allowed to pass through to Pillow's authoritative verification below,
+    # since it's a common fallback MIME type for HEIC across browsers.
+    if file.content_type:
+        if (
+            file.content_type not in ALLOWED_CONTENT_TYPES
+            and file.content_type != "application/octet-stream"
+        ):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Unsupported file type. Please upload a JPG, PNG, WEBP, or HEIC image."
+            )
 
     # 2. Size check
     if len(image_bytes) == 0:
@@ -62,7 +83,7 @@ def validate_uploaded_image(file: UploadFile, image_bytes: bytes) -> str:
     if len(image_bytes) > MAX_UPLOAD_SIZE_BYTES:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="File is too large. Maximum allowed size is 5 MB."
+            detail="File is too large. Maximum allowed size is 20 MB."
         )
 
     # 3. Real content verification — this is the authoritative check.
@@ -90,7 +111,7 @@ def validate_uploaded_image(file: UploadFile, image_bytes: bytes) -> str:
     if detected_format not in ALLOWED_PIL_FORMATS:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Unsupported image format. Please upload a JPG or PNG image."
+            detail="Unsupported image format. Please upload a JPG, PNG, WEBP, or HEIC image."
         )
 
     return FORMAT_TO_EXTENSION[detected_format]
@@ -127,10 +148,7 @@ async def analyze(
     photo_url = f"/uploaded_scans/{unique_filename}"
 
     # Run CV analysis
-    cv_scores = analyze_skin(
-    image_bytes,
-    photo_confidence=quality["confidence"]
-)
+    cv_scores = analyze_skin(image_bytes)
 
     # Get weather data
     try:
