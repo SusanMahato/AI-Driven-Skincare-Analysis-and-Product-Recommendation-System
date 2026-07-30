@@ -6,8 +6,10 @@ from app.models.user import User
 from app.models.scan import Scan
 from app.services.cv_service import analyze_skin, check_photo_quality
 from app.services.weather_service import get_full_weather
+from PIL import Image
 import os
 import uuid
+import io
 
 router = APIRouter(prefix="/scan", tags=["Scan"])
 
@@ -27,6 +29,73 @@ CONDITION_FIELDS = [
     "dark_circles_score",
 ]
 
+# --- File upload validation config ---
+ALLOWED_CONTENT_TYPES = {"image/jpeg", "image/png"}
+ALLOWED_PIL_FORMATS = {"JPEG", "PNG"}
+MAX_UPLOAD_SIZE_BYTES = 5 * 1024 * 1024  # 5 MB
+
+FORMAT_TO_EXTENSION = {
+    "JPEG": ".jpg",
+    "PNG": ".png",
+}
+
+
+def validate_uploaded_image(file: UploadFile, image_bytes: bytes) -> str:
+    """
+    Validates an uploaded image file. Raises HTTPException on any failure.
+    Returns the safe file extension to use when saving, derived from the
+    actual verified image content — never from the client-supplied filename.
+    """
+    # 1. Content-type check (client-declared, spoofable, but cheap first filter)
+    if file.content_type not in ALLOWED_CONTENT_TYPES:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Unsupported file type. Please upload a JPG or PNG image."
+        )
+
+    # 2. Size check
+    if len(image_bytes) == 0:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Uploaded file is empty."
+        )
+    if len(image_bytes) > MAX_UPLOAD_SIZE_BYTES:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="File is too large. Maximum allowed size is 5 MB."
+        )
+
+    # 3. Real content verification — this is the authoritative check.
+    # Client-supplied content_type and filename are both spoofable; this is not.
+    try:
+        img = Image.open(io.BytesIO(image_bytes))
+        img.verify()  # checks the file is a valid, non-corrupted image
+    except Exception:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Uploaded file is not a valid or is a corrupted image."
+        )
+
+    # img.verify() invalidates the image object for further use, so re-open
+    # to safely read the format after verification succeeds.
+    try:
+        img = Image.open(io.BytesIO(image_bytes))
+        detected_format = img.format
+    except Exception:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Uploaded file is not a valid or is a corrupted image."
+        )
+
+    if detected_format not in ALLOWED_PIL_FORMATS:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Unsupported image format. Please upload a JPG or PNG image."
+        )
+
+    return FORMAT_TO_EXTENSION[detected_format]
+
+
 @router.post("/analyze")
 async def analyze(
     file: UploadFile = File(...),
@@ -38,7 +107,10 @@ async def analyze(
     # Read image
     image_bytes = await file.read()
 
-    # Check photo quality first
+    # Validate the upload BEFORE any processing — type, size, and real image content
+    file_extension = validate_uploaded_image(file, image_bytes)
+
+    # Check photo quality (blur/brightness/etc.) after confirming it's a real, valid image
     quality = check_photo_quality(image_bytes)
     if not quality["passed"]:
         raise HTTPException(
@@ -46,8 +118,8 @@ async def analyze(
             detail=quality["issues"]
         )
 
-    # Save the photo to disk
-    file_extension = os.path.splitext(file.filename)[1] or ".jpg"
+    # Save the photo to disk — filename extension now comes from verified image content,
+    # never from the client-supplied filename
     unique_filename = f"{current_user.id}_{uuid.uuid4().hex}{file_extension}"
     file_path = os.path.join(UPLOAD_DIR, unique_filename)
     with open(file_path, "wb") as f:

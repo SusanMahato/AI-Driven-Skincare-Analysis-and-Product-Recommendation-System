@@ -60,7 +60,7 @@ def verify_email_token(db: Session, token: str):
     return user
 
 def generate_otp() -> str:
-    return str(random.randint(100000, 999999))
+    return str(secrets.randbelow(900000) + 100000)
 
 def create_password_reset_otp(db: Session, email: str):
     user = get_user_by_email(db, email)
