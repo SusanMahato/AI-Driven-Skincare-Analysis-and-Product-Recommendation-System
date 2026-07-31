@@ -1,16 +1,20 @@
-from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, status, Query, Request
+import io
+import logging
+import os
+import uuid
+from PIL import Image
+from fastapi import APIRouter, Depends, File, HTTPException, Query, Request, UploadFile, status
 from sqlalchemy.orm import Session
+
 from app.core.database import get_db
 from app.core.dependencies import get_current_user
 from app.core.limiter import limiter
-from app.models.user import User
 from app.models.scan import Scan
+from app.models.user import User
 from app.services.cv_service import analyze_skin, check_photo_quality
 from app.services.weather_service import get_full_weather
-from PIL import Image
-import os
-import uuid
-import io
+
+logger = logging.getLogger("skincare_api")
 
 router = APIRouter(prefix="/scan", tags=["Scan"])
 
@@ -31,14 +35,6 @@ CONDITION_FIELDS = [
 ]
 
 # --- File upload validation config ---
-# HEIC/HEIF support was attempted via pillow-heif but reverted: it requires
-# compiling against libheif, and Render's build image ships a libheif version
-# too old for pillow-heif 0.18.0 (missing a required function), causing the
-# build to fail. Fixing this would require a custom Dockerfile/build script to
-# install a newer libheif-dev — judged too risky this close to the deadline.
-# Documented as future work. JPG/PNG/WEBP covers the vast majority of cases;
-# iPhone users on default camera settings should switch to "Most Compatible"
-# (Settings > Camera > Formats) or the browser/OS may auto-convert on upload.
 ALLOWED_CONTENT_TYPES = {
     "image/jpeg", "image/png", "image/webp",
 }
@@ -77,19 +73,17 @@ def validate_uploaded_image(file: UploadFile, image_bytes: bytes) -> str:
             detail="File is too large. Maximum allowed size is 20 MB."
         )
 
-    # 3. Real content verification — this is the authoritative check.
-    # Client-supplied content_type and filename are both spoofable; this is not.
+    # 3. Real content verification
     try:
         img = Image.open(io.BytesIO(image_bytes))
-        img.verify()  # checks the file is a valid, non-corrupted image
+        img.verify()  # Checks if the file is a valid, non-corrupted image
     except Exception:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Uploaded file is not a valid or is a corrupted image."
         )
 
-    # img.verify() invalidates the image object for further use, so re-open
-    # to safely read the format after verification succeeds.
+    # img.verify() invalidates the image object, so re-open to safely read format
     try:
         img = Image.open(io.BytesIO(image_bytes))
         detected_format = img.format
@@ -121,10 +115,10 @@ async def analyze(
     # Read image
     image_bytes = await file.read()
 
-    # Validate the upload BEFORE any processing — type, size, and real image content
+    # Validate the upload BEFORE processing
     file_extension = validate_uploaded_image(file, image_bytes)
 
-    # Check photo quality (blur/brightness/etc.) after confirming it's a real, valid image
+    # Check photo quality (blur/brightness/etc.)
     quality = check_photo_quality(image_bytes)
     if not quality["passed"]:
         raise HTTPException(
@@ -132,8 +126,7 @@ async def analyze(
             detail=quality["issues"]
         )
 
-    # Save the photo to disk — filename extension now comes from verified image content,
-    # never from the client-supplied filename
+    # Save photo to disk
     unique_filename = f"{current_user.id}_{uuid.uuid4().hex}{file_extension}"
     file_path = os.path.join(UPLOAD_DIR, unique_filename)
     with open(file_path, "wb") as f:
@@ -177,12 +170,15 @@ async def analyze(
     db.commit()
     db.refresh(scan)
 
+    logger.info(f"Scan uploaded: scan_id={scan.id}, user_id={current_user.id}")
+
     return {
         "scan_id": scan.id,
         "cv_scores": cv_scores,
         "weather": weather,
         "photo_url": photo_url
     }
+
 
 @router.get("/history")
 def get_scan_history(
@@ -193,6 +189,7 @@ def get_scan_history(
         Scan.user_id == current_user.id
     ).order_by(Scan.created_at.desc()).all()
     return scans
+
 
 @router.get("/compare")
 def compare_scans(
@@ -260,6 +257,8 @@ def compare_scans(
             "delta": round(delta, 4),
             "status": status_label
         })
+
+    logger.info(f"Scan comparison: user_id={current_user.id}, scan_ids=({older_scan.id}, {newer_scan.id})")
 
     return {
         "older_scan": {

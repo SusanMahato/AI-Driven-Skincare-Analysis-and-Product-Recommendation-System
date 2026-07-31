@@ -1,17 +1,21 @@
+import logging
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
+
 from app.core.database import get_db
 from app.core.dependencies import get_current_user
-from app.models.user import User
 from app.models.scan import Scan
+from app.models.user import User
+from app.services.quiz_service import get_skin_profile
 from app.services.recommendation_service import (
+    generate_skin_report,
     get_recommended_ingredients,
     get_spf_recommendation,
-    generate_skin_report,
     ingredient_engine,
     product_engine,
 )
-from app.services.quiz_service import get_skin_profile
+
+logger = logging.getLogger("skincare_api")
 
 router = APIRouter(prefix="/recommendation", tags=["Recommendation"])
 
@@ -68,6 +72,8 @@ def get_latest_recommendation(
     ingredients = get_recommended_ingredients(cv_scores, skin_profile_dict)
     spf = get_spf_recommendation(scan.uv_index)
     skin_report = generate_skin_report(cv_scores, skin_profile_dict, weather, ingredients)
+
+    logger.info(f"Recommendation generated: user_id={current_user.id}, scan_id={scan.id}")
 
     return {
         "ingredients": ingredients,
@@ -134,3 +140,4 @@ def get_product_recommendations(
         "ingredients": ranked_ingredients,
         "products": products,
     }
+    
