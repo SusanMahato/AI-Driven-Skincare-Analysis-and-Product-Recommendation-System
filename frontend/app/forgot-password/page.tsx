@@ -16,21 +16,28 @@ export default function ForgotPasswordPage() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
-  const handleSendOtp = async (e: React.FormEvent) => {
+ const handleSendOtp = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError('');
     try {
       await axios.post(`${API_BASE_URL}/auth/forgot-password`, { email });
       setStep('otp');
-    } catch (err) {
-      setError('Something went wrong. Please try again.');
+    } catch (err: any) {
+      const detail = err.response?.data?.detail;
+      if (Array.isArray(detail)) {
+        setError(detail[0]?.msg || 'Please check your email and try again.');
+      } else if (typeof detail === 'string') {
+        setError(detail);
+      } else {
+        setError('Something went wrong. Please try again.');
+      }
     } finally {
       setLoading(false);
     }
-  };
+};
 
-  const handleResetPassword = async (e: React.FormEvent) => {
+ const handleResetPassword = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError('');
@@ -43,11 +50,19 @@ export default function ForgotPasswordPage() {
       setSuccess('Password reset successfully!');
       setTimeout(() => router.push('/login'), 2000);
     } catch (err: any) {
-      setError(err.response?.data?.detail || 'Invalid or expired OTP.');
+      const detail = err.response?.data?.detail;
+      if (Array.isArray(detail)) {
+        // Pydantic validation errors (422) — extract the first readable message
+        setError(detail[0]?.msg || 'Please check your new password and try again.');
+      } else if (typeof detail === 'string') {
+        setError(detail);
+      } else {
+        setError('Invalid or expired OTP.');
+      }
     } finally {
       setLoading(false);
     }
-  };
+};
 
   return (
     <div className="min-h-screen bg-rose-50 flex items-center justify-center px-4">
