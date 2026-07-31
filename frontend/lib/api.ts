@@ -18,6 +18,25 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
+// Automatically handle expired/invalid JWT tokens
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      localStorage.removeItem('access_token');
+
+      if (
+        typeof window !== 'undefined' &&
+        window.location.pathname !== '/login'
+      ) {
+        window.location.href = '/login';
+      }
+    }
+
+    return Promise.reject(error);
+  }
+);
+
 // Auth
 export const registerUser = (data: { full_name: string; email: string; password: string }) =>
   api.post('/auth/register', data);
