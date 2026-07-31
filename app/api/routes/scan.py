@@ -1,7 +1,8 @@
-from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, status, Query
+from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, status, Query, Request
 from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.core.dependencies import get_current_user
+from app.core.limiter import limiter
 from app.models.user import User
 from app.models.scan import Scan
 from app.services.cv_service import analyze_skin, check_photo_quality
@@ -108,7 +109,9 @@ def validate_uploaded_image(file: UploadFile, image_bytes: bytes) -> str:
 
 
 @router.post("/analyze")
+@limiter.limit("20/hour")
 async def analyze(
+    request: Request,
     file: UploadFile = File(...),
     lat: float = 27.7172,
     lon: float = 85.3240,

@@ -5,6 +5,10 @@ from fastapi.responses import JSONResponse
 from fastapi.exceptions import RequestValidationError
 from fastapi.encoders import jsonable_encoder
 from starlette.exceptions import HTTPException as StarletteHTTPException
+from slowapi.errors import RateLimitExceeded
+from slowapi.middleware import SlowAPIMiddleware
+from slowapi.util import get_remote_address
+from app.core.limiter import limiter
 from app.api.routes import auth, quiz, weather, scan, recommendation, oauth, journal
 from app.core.config import settings
 import os
@@ -20,6 +24,10 @@ app = FastAPI(
     title="Skincare Analysis & Recommendation System",
     version="1.0.0"
 )
+
+# Rate limiting setup
+app.state.limiter = limiter
+app.add_middleware(SlowAPIMiddleware)
 
 app.add_middleware(
     CORSMiddleware,
@@ -93,6 +101,21 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
     return JSONResponse(
         status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
         content=jsonable_encoder({"detail": exc.errors()}),
+    )
+
+
+@app.exception_handler(RateLimitExceeded)
+async def rate_limit_exceeded_handler(request: Request, exc: RateLimitExceeded):
+    """
+    Fired when a client exceeds a rate limit on a protected endpoint
+    (login, forgot-password, reset-password, scan analyze). Returned in
+    the same JSON shape as every other error response in this app.
+    """
+    client_ip = get_remote_address(request)
+    logger.warning(f"Rate limit exceeded on {request.method} {request.url.path} from {client_ip}")
+    return JSONResponse(
+        status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+        content={"detail": "Too many requests. Please wait a moment and try again."},
     )
 
 
