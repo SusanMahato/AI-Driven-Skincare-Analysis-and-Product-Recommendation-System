@@ -191,26 +191,26 @@ export default function DashboardPage() {
         </span>
         <div className="flex gap-2">
           <button
-            onClick={() => router.push('/scan')}
-            className="cursor-pointer rounded-md bg-[#182019] px-4 py-2 text-sm font-[family-name:var(--font-mono)] uppercase tracking-[0.08em] text-[#F5F2EA] transition hover:bg-[#BD7B54] flex items-center gap-2"
-          >
-            <Camera size={15} />
-            New Scan
-          </button>
-          <button
-           onClick={() => router.push('/profile')}
-           className="cursor-pointer rounded-md border border-[#20241F]/15 bg-white/60 px-4 py-2 text-sm font-[family-name:var(--font-mono)] uppercase tracking-[0.08em] text-[#20241F]/80 transition hover:bg-white flex items-center gap-2"
-           >
-           <User size={15} />
-            Profile
-          </button>
-          <button
-           onClick={() => { removeToken(); router.push('/login?logout=success'); }}
-           className="cursor-pointer rounded-md border border-red-300/50 px-4 py-2 text-sm font-[family-name:var(--font-mono)] uppercase tracking-[0.08em] text-red-600/80 transition hover:bg-red-50 flex items-center gap-2"
-           > 
-          <LogOut size={15} />
-          Logout
-         </button>
+  onClick={() => router.push('/scan')}
+  className="cursor-pointer rounded-md bg-[#182019] px-3 sm:px-4 py-2 text-sm font-[family-name:var(--font-mono)] uppercase tracking-[0.08em] text-[#F5F2EA] transition hover:bg-[#BD7B54] flex items-center gap-2"
+>
+  <Camera size={15} />
+  <span className="hidden sm:inline">New Scan</span>
+</button>
+<button
+  onClick={() => router.push('/profile')}
+  className="cursor-pointer rounded-md border border-[#20241F]/15 bg-white/60 px-3 sm:px-4 py-2 text-sm font-[family-name:var(--font-mono)] uppercase tracking-[0.08em] text-[#20241F]/80 transition hover:bg-white flex items-center gap-2"
+>
+  <User size={15} />
+  <span className="hidden sm:inline">Profile</span>
+      </button>
+        <button
+        onClick={() => { removeToken(); router.push('/login?logout=success'); }}
+        className="cursor-pointer rounded-md border border-red-300/50 px-3 sm:px-4 py-2 text-sm font-[family-name:var(--font-mono)] uppercase tracking-[0.08em] text-red-600/80 transition hover:bg-red-50 flex items-center gap-2"
+        >
+        <LogOut size={15} />
+        <span className="hidden sm:inline">Logout</span>
+        </button>
         </div>
       </div>
 
