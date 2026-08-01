@@ -198,19 +198,19 @@ export default function DashboardPage() {
             New Scan
           </button>
           <button
-            onClick={() => router.push('/profile')}
-            className="cursor-pointer rounded-md border border-[#20241F]/15 bg-white/60 px-4 py-2 text-sm font-medium text-[#20241F]/80 transition hover:bg-white flex items-center gap-2"
-          >
-            <User size={15} />
+           onClick={() => router.push('/profile')}
+           className="cursor-pointer rounded-md border border-[#20241F]/15 bg-white/60 px-4 py-2 text-sm font-[family-name:var(--font-mono)] uppercase tracking-[0.08em] text-[#20241F]/80 transition hover:bg-white flex items-center gap-2"
+           >
+           <User size={15} />
             Profile
           </button>
           <button
-            onClick={() => { removeToken(); router.push('/login?logout=success'); }}
-            className="cursor-pointer rounded-md border border-red-300/50 px-4 py-2 text-sm font-medium text-red-600/80 transition hover:bg-red-50 flex items-center gap-2"
-          >
-            <LogOut size={15} />
-            Logout
-          </button>
+           onClick={() => { removeToken(); router.push('/login?logout=success'); }}
+           className="cursor-pointer rounded-md border border-red-300/50 px-4 py-2 text-sm font-[family-name:var(--font-mono)] uppercase tracking-[0.08em] text-red-600/80 transition hover:bg-red-50 flex items-center gap-2"
+           > 
+          <LogOut size={15} />
+          Logout
+         </button>
         </div>
       </div>
 
