@@ -4,6 +4,24 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { analyzeScan } from '@/lib/api';
 import { isLoggedIn } from '@/lib/auth';
+import { Fraunces, IBM_Plex_Sans, IBM_Plex_Mono } from 'next/font/google';
+import { ArrowLeft, Camera, Loader2, ScanSearch, CloudSun, ArrowRight, X } from 'lucide-react';
+
+const fraunces = Fraunces({
+  subsets: ['latin'],
+  weight: ['500', '600'],
+  variable: '--font-display',
+});
+const plexSans = IBM_Plex_Sans({
+  subsets: ['latin'],
+  weight: ['400', '500'],
+  variable: '--font-body',
+});
+const plexMono = IBM_Plex_Mono({
+  subsets: ['latin'],
+  weight: ['400', '500'],
+  variable: '--font-mono',
+});
 
 export default function ScanPage() {
   const router = useRouter();
@@ -46,9 +64,15 @@ export default function ScanPage() {
   };
 
   const scoreColor = (score: number) => {
-    if (score < 0.3) return 'bg-green-400';
-    if (score < 0.6) return 'bg-yellow-400';
-    return 'bg-rose-400';
+    if (score < 0.3) return 'bg-emerald-500';
+    if (score < 0.6) return 'bg-[#BD7B54]';
+    return 'bg-red-500';
+  };
+
+  const scoreTextColor = (score: number) => {
+    if (score < 0.3) return 'text-emerald-600';
+    if (score < 0.6) return 'text-[#BD7B54]';
+    return 'text-red-600';
   };
 
   const scoreLabel = (score: number) => {
@@ -58,41 +82,48 @@ export default function ScanPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className={`${fraunces.variable} ${plexSans.variable} ${plexMono.variable} min-h-screen bg-[#F5F2EA] font-[family-name:var(--font-body)]`}>
       {/* Header */}
-      <div className="bg-white border-b border-gray-100 px-6 py-4 flex justify-between items-center sticky top-0 z-10">
-        <button onClick={() => router.push('/dashboard')} className="text-rose-500 font-medium text-sm flex items-center gap-1 cursor-pointer">
-          ← Back
+      <div className="sticky top-0 z-10 border-b border-[#20241F]/10 bg-[#F5F2EA]/90 backdrop-blur-md px-6 py-4 flex justify-between items-center">
+        <button
+          onClick={() => router.push('/dashboard')}
+          className="text-[#20241F]/60 hover:text-[#20241F] text-sm flex items-center gap-1.5 cursor-pointer transition"
+        >
+          <ArrowLeft size={15} /> Back
         </button>
-        <h1 className="text-lg font-bold text-gray-800">Skin Analysis</h1>
-        <div></div>
+        <h1 className="font-[family-name:var(--font-display)] text-lg font-medium text-[#20241F]">Skin Analysis</h1>
+        <div className="w-12"></div>
       </div>
 
-      <div className="max-w-lg mx-auto px-6 py-8 space-y-6">
+      <div className="max-w-lg mx-auto px-6 py-8 space-y-4">
 
         {/* Tips */}
-        <div className="bg-rose-50 border border-rose-100 rounded-2xl p-4">
-          <p className="text-sm font-medium text-rose-600 mb-2">📸 Tips for best results</p>
-          <ul className="text-xs text-rose-500 space-y-1">
-            <li>• Good natural lighting, face the camera directly</li>
-            <li>• Remove glasses and pull hair back</li>
-            <li>• Clean bare skin, no makeup</li>
+        <div className="rounded-lg border border-[#BD7B54]/25 bg-[#BD7B54]/5 p-4">
+          <p className="font-[family-name:var(--font-mono)] text-[11px] uppercase tracking-[0.08em] text-[#BD7B54] mb-2">
+            Tips for best results
+          </p>
+          <ul className="text-xs text-[#20241F]/65 space-y-1">
+            <li>— Good natural lighting, face the camera directly</li>
+            <li>— Remove glasses and pull hair back</li>
+            <li>— Clean bare skin, no makeup</li>
           </ul>
         </div>
 
         {/* Upload */}
-        <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-          <h2 className="text-md font-semibold text-gray-800 mb-4">Upload Photo</h2>
+        <div className="rounded-lg border border-[#20241F]/12 bg-white p-6">
+          <h2 className="font-[family-name:var(--font-mono)] text-[11px] uppercase tracking-[0.1em] text-[#20241F]/50 mb-4">
+            Upload Photo
+          </h2>
 
           <label className="block cursor-pointer">
-            <div className="border-2 border-dashed border-rose-200 rounded-xl p-8 text-center hover:border-rose-400 transition">
+            <div className="border-2 border-dashed border-[#20241F]/15 rounded-lg p-8 text-center hover:border-[#BD7B54]/50 transition">
               {preview ? (
-                <img src={preview} alt="Preview" className="w-48 h-48 object-cover rounded-xl mx-auto" />
+                <img src={preview} alt="Preview" className="w-48 h-48 object-cover rounded-lg mx-auto" />
               ) : (
                 <div>
-                  <p className="text-5xl mb-3">📷</p>
-                  <p className="text-sm font-medium text-gray-600">Click to upload photo</p>
-                  <p className="text-xs text-gray-400 mt-1">JPG, PNG or HEIC</p>
+                  <Camera size={36} className="mx-auto mb-3 text-[#20241F]/25" strokeWidth={1.5} />
+                  <p className="text-sm font-medium text-[#20241F]/70">Click to upload photo</p>
+                  <p className="text-xs text-[#20241F]/40 mt-1">JPG, PNG or WEBP</p>
                 </div>
               )}
             </div>
@@ -107,14 +138,14 @@ export default function ScanPage() {
           {preview && (
             <button
               onClick={() => { setFile(null); setPreview(null); setResult(null); }}
-              className="mt-3 text-xs text-gray-400 hover:text-gray-600 transition"
+              className="mt-3 text-xs text-[#20241F]/40 hover:text-[#20241F]/70 transition cursor-pointer flex items-center gap-1"
             >
-              Remove photo
+              <X size={12} /> Remove photo
             </button>
           )}
 
           {error && (
-            <div className="mt-3 bg-red-50 border border-red-100 rounded-xl px-4 py-3">
+            <div className="mt-3 bg-red-50 border border-red-100 rounded-lg px-4 py-3">
               <p className="text-red-600 text-sm">{error}</p>
             </div>
           )}
@@ -122,11 +153,11 @@ export default function ScanPage() {
           <button
             onClick={handleScan}
             disabled={!file || loading}
-            className="mt-4 w-full bg-rose-500 text-white rounded-xl py-3 text-sm font-semibold hover:bg-rose-600 transition disabled:opacity-50 shadow-sm"
+            className="mt-4 w-full cursor-pointer rounded-md bg-[#182019] py-3 font-[family-name:var(--font-mono)] text-xs uppercase tracking-[0.1em] text-[#F5F2EA] transition hover:bg-[#BD7B54] disabled:opacity-50"
           >
             {loading ? (
               <span className="flex items-center justify-center gap-2">
-                <span className="animate-spin">⏳</span> Analyzing your skin...
+                <Loader2 size={14} className="animate-spin" /> Analyzing your skin...
               </span>
             ) : 'Analyze Skin'}
           </button>
@@ -134,8 +165,13 @@ export default function ScanPage() {
 
         {/* Results */}
         {result && (
-          <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-            <h3 className="text-md font-semibold text-gray-800 mb-5">Analysis Results</h3>
+          <div className="rounded-lg border border-[#20241F]/12 bg-white p-6">
+            <div className="flex items-center gap-2 mb-5">
+              <ScanSearch size={16} className="text-[#BD7B54]" />
+              <h3 className="font-[family-name:var(--font-mono)] text-[11px] uppercase tracking-[0.1em] text-[#20241F]/50">
+                Analysis Results
+              </h3>
+            </div>
 
             <div className="space-y-4">
               {Object.entries(result.cv_scores)
@@ -143,19 +179,19 @@ export default function ScanPage() {
                 .map(([key, value]: [string, any]) => (
                   <div key={key}>
                     <div className="flex justify-between text-sm mb-1.5">
-                      <span className="text-gray-600 capitalize font-medium">
+                      <span className="text-[#20241F]/75 capitalize font-medium">
                         {key.replace('_score', '').replace('_', ' ')}
                       </span>
                       <div className="flex items-center gap-2">
-                        <span className={`text-xs px-2 py-0.5 rounded-full text-white ${scoreColor(value)}`}>
+                        <span className={`text-xs font-medium ${scoreTextColor(value)}`}>
                           {scoreLabel(value)}
                         </span>
-                        <span className="text-gray-800 font-semibold">{(value * 100).toFixed(0)}%</span>
+                        <span className="font-[family-name:var(--font-display)] text-sm font-medium text-[#20241F]">{(value * 100).toFixed(0)}%</span>
                       </div>
                     </div>
-                    <div className="w-full bg-gray-100 rounded-full h-2">
+                    <div className="w-full bg-[#20241F]/8 rounded-full h-1.5">
                       <div
-                        className={`${scoreColor(value)} h-2 rounded-full transition-all duration-500`}
+                        className={`${scoreColor(value)} h-1.5 rounded-full transition-all duration-500`}
                         style={{ width: `${value * 100}%` }}
                       />
                     </div>
@@ -163,24 +199,27 @@ export default function ScanPage() {
                 ))}
             </div>
 
-            <div className="mt-5 bg-gray-50 rounded-xl p-4 flex justify-between items-center">
-              <div>
-                <p className="text-xs text-gray-400">Weather at scan time</p>
-                <p className="text-sm text-gray-700 mt-0.5 font-medium">
-                  {result.weather.weather_condition} · {result.weather.temperature}°C
-                </p>
+            <div className="mt-5 bg-[#F5F2EA] rounded-lg p-4 flex justify-between items-center">
+              <div className="flex items-center gap-2">
+                <CloudSun size={16} className="text-[#20241F]/40" />
+                <div>
+                  <p className="font-[family-name:var(--font-mono)] text-[10px] uppercase tracking-[0.06em] text-[#20241F]/40">Weather at scan time</p>
+                  <p className="text-sm text-[#20241F]/75 mt-0.5 font-medium">
+                    {result.weather.weather_condition} · {result.weather.temperature}°C
+                  </p>
+                </div>
               </div>
               <div className="text-right">
-                <p className="text-xs text-gray-400">UV Index</p>
-                <p className="text-sm font-bold text-orange-500">{result.weather.uv_index}</p>
+                <p className="font-[family-name:var(--font-mono)] text-[10px] uppercase tracking-[0.06em] text-[#20241F]/40">UV Index</p>
+                <p className="font-[family-name:var(--font-display)] text-sm font-medium text-[#BD7B54]">{result.weather.uv_index}</p>
               </div>
             </div>
 
             <button
               onClick={() => router.push('/dashboard')}
-              className="mt-4 w-full bg-gray-800 text-white rounded-xl py-3 text-sm font-semibold hover:bg-gray-900 transition"
+              className="mt-4 w-full cursor-pointer rounded-md bg-[#182019] py-3 font-[family-name:var(--font-mono)] text-xs uppercase tracking-[0.1em] text-[#F5F2EA] transition hover:bg-[#BD7B54] flex items-center justify-center gap-2"
             >
-              View Full Recommendation →
+              View Full Recommendation <ArrowRight size={14} />
             </button>
           </div>
         )}

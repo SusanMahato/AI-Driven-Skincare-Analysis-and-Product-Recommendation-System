@@ -7,8 +7,6 @@ import { registerUser } from '@/lib/api';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
 
-// NOTE: hoist these into layout.tsx if not already done there for the login page,
-// so fonts aren't re-initialized per route.
 const fraunces = Fraunces({
   subsets: ['latin'],
   weight: ['500', '600'],
@@ -88,7 +86,7 @@ export default function RegisterPage() {
             <div className="text-center">
               <p className="text-5xl mb-6">✅</p>
               <h1 className="font-[family-name:var(--font-display)] text-3xl font-medium text-[#20241F] mb-4">
-                Account Created!
+               Account created successfully
               </h1>
               <p className="text-sm text-[#20241F]/70 mb-2">
                 We've sent a verification link to:
@@ -202,8 +200,7 @@ export default function RegisterPage() {
             Free forever. No credit card required.
           </p>
 
-          
-            <a href={`${API_BASE_URL}/auth/google`} className="w-full flex items-center justify-center gap-3 border border-[#20241F]/15 py-3 text-sm font-medium text-[#20241F]/80 hover:bg-[#20241F]/5 transition-colors cursor-pointer mb-6">
+          <a href={`${API_BASE_URL}/auth/google`} className="w-full flex items-center justify-center gap-3 border border-[#20241F]/15 py-3 text-sm font-medium text-[#20241F]/80 transition-colors cursor-pointer mb-6 hover:bg-[#20241F]/5 rounded-md">
             <svg width="16" height="16" viewBox="0 0 18 18">
               <path fill="#4285F4" d="M16.51 8H8.98v3h4.3c-.18 1-.74 1.48-1.6 2.04v2.01h2.6a7.8 7.8 0 0 0 2.38-5.88c0-.57-.05-.66-.15-1.18z" />
               <path fill="#34A853" d="M8.98 17c2.16 0 3.97-.72 5.3-1.94l-2.6-2.04a4.8 4.8 0 0 1-7.18-2.54H1.83v2.07A8 8 0 0 0 8.98 17z" />
@@ -296,7 +293,7 @@ export default function RegisterPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-[#182019] text-[#F5F2EA] py-3 text-sm font-[family-name:var(--font-mono)] uppercase tracking-[0.12em] hover:bg-[#BD7B54] transition-colors disabled:opacity-50 cursor-pointer"
+              className="w-full bg-[#182019] text-[#F5F2EA] py-3 text-sm font-[family-name:var(--font-mono)] uppercase tracking-[0.12em] hover:bg-[#BD7B54] transition-colors disabled:opacity-50 cursor-pointer rounded-md"
             >
               {loading ? 'Creating account…' : 'Create account'}
             </button>

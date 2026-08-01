@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { upsertJournalEntry, getJournalEntries, getJournalInsights } from '@/lib/api';
+import { Lightbulb, CalendarDays, NotebookPen } from 'lucide-react';
 
 export default function JournalTab() {
   const [entries, setEntries] = useState<any[]>([]);
@@ -84,35 +85,45 @@ export default function JournalTab() {
     return labels[level] || '—';
   };
 
+  const inputClass =
+    'w-full border border-[#20241F]/15 rounded-md px-3 py-2.5 text-sm bg-white focus:outline-none focus:border-[#BD7B54] transition-colors';
+  const labelClass =
+    'block font-[family-name:var(--font-mono)] text-[10px] uppercase tracking-[0.08em] text-[#20241F]/50 mb-1.5';
+
   if (loading) {
     return (
-      <div className="bg-white rounded-2xl p-12 shadow-sm border border-gray-100 text-center">
-        <p className="text-gray-400 text-sm">Loading your journal...</p>
+      <div className="rounded-lg border border-[#20241F]/12 bg-white p-12 text-center">
+        <p className="text-[#20241F]/45 text-sm">Loading your journal...</p>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
 
       {/* Entry Form */}
-      <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-        <h3 className="font-semibold text-gray-800 mb-4">Log a Day</h3>
+      <div className="rounded-lg border border-[#20241F]/12 bg-white p-6">
+        <div className="flex items-center gap-2 mb-5">
+          <NotebookPen size={16} className="text-[#BD7B54]" />
+          <h3 className="font-[family-name:var(--font-mono)] text-[11px] uppercase tracking-[0.1em] text-[#20241F]/50">
+            Log a Day
+          </h3>
+        </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label className="block text-xs text-gray-500 mb-1.5">Date</label>
+            <label className={labelClass}>Date</label>
             <input
               type="date"
               value={form.date}
               max={todayStr}
               onChange={(e) => handleChange('date', e.target.value)}
-              className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-rose-300"
+              className={inputClass}
             />
           </div>
 
           <div>
-            <label className="block text-xs text-gray-500 mb-1.5">Sleep (hours)</label>
+            <label className={labelClass}>Sleep (hours)</label>
             <input
               type="number"
               step="0.5"
@@ -121,12 +132,12 @@ export default function JournalTab() {
               placeholder="e.g. 7.5"
               value={form.sleep_hours}
               onChange={(e) => handleChange('sleep_hours', e.target.value)}
-              className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-rose-300"
+              className={inputClass}
             />
           </div>
 
           <div>
-            <label className="block text-xs text-gray-500 mb-1.5">Water Intake (liters)</label>
+            <label className={labelClass}>Water Intake (liters)</label>
             <input
               type="number"
               step="0.1"
@@ -134,16 +145,16 @@ export default function JournalTab() {
               placeholder="e.g. 2.0"
               value={form.water_intake_liters}
               onChange={(e) => handleChange('water_intake_liters', e.target.value)}
-              className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-rose-300"
+              className={inputClass}
             />
           </div>
 
           <div>
-            <label className="block text-xs text-gray-500 mb-1.5">Stress Level (1-5)</label>
+            <label className={labelClass}>Stress Level (1-5)</label>
             <select
               value={form.stress_level}
               onChange={(e) => handleChange('stress_level', e.target.value)}
-              className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-rose-300 bg-white"
+              className={inputClass}
             >
               <option value="">Select...</option>
               <option value="1">1 - Very Low</option>
@@ -155,7 +166,7 @@ export default function JournalTab() {
           </div>
 
           <div>
-            <label className="block text-xs text-gray-500 mb-1.5">Exercise (minutes)</label>
+            <label className={labelClass}>Exercise (minutes)</label>
             <input
               type="number"
               step="1"
@@ -163,64 +174,66 @@ export default function JournalTab() {
               placeholder="e.g. 30"
               value={form.exercise_minutes}
               onChange={(e) => handleChange('exercise_minutes', e.target.value)}
-              className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-rose-300"
+              className={inputClass}
             />
           </div>
 
           <div className="md:col-span-2">
-            <label className="block text-xs text-gray-500 mb-1.5">Notes (optional)</label>
+            <label className={labelClass}>Notes (optional)</label>
             <textarea
               placeholder="Anything else worth noting..."
               value={form.notes}
               onChange={(e) => handleChange('notes', e.target.value)}
               rows={2}
-              className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-rose-300 resize-none"
+              className={`${inputClass} resize-none`}
             />
           </div>
         </div>
 
         {error && (
-          <div className="mt-4 bg-red-50 border border-red-100 rounded-xl px-4 py-3">
+          <div className="mt-4 bg-red-50 border border-red-100 rounded-lg px-4 py-3">
             <p className="text-red-600 text-sm">{error}</p>
           </div>
         )}
 
         {success && (
-          <div className="mt-4 bg-green-50 border border-green-100 rounded-xl px-4 py-3">
-            <p className="text-green-600 text-sm">{success}</p>
+          <div className="mt-4 bg-emerald-50 border border-emerald-100 rounded-lg px-4 py-3">
+            <p className="text-emerald-700 text-sm">{success}</p>
           </div>
         )}
 
         <button
           onClick={handleSubmit}
           disabled={saving}
-          className="mt-4 w-full bg-rose-500 text-white rounded-xl py-3 text-sm font-semibold hover:bg-rose-600 transition disabled:opacity-50 shadow-sm cursor-pointer"
+          className="mt-4 w-full cursor-pointer rounded-md bg-[#182019] py-3 font-[family-name:var(--font-mono)] text-xs uppercase tracking-[0.1em] text-[#F5F2EA] transition hover:bg-[#BD7B54] disabled:opacity-50"
         >
           {saving ? 'Saving...' : 'Save Entry'}
         </button>
       </div>
 
       {/* Insights */}
-      <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+      <div className="rounded-lg border border-[#20241F]/12 bg-white p-6">
         <div className="flex items-center gap-2 mb-4">
-          <span className="text-lg">💡</span>
-          <h3 className="font-semibold text-gray-800">Insights</h3>
+          <Lightbulb size={16} className="text-[#BD7B54]" />
+          <h3 className="font-[family-name:var(--font-mono)] text-[11px] uppercase tracking-[0.1em] text-[#20241F]/50">
+            Insights
+          </h3>
         </div>
 
         {insights?.insights?.length > 0 ? (
           <div className="space-y-3">
             {insights.insights.map((insight: any, i: number) => (
-              <div key={i} className="bg-rose-50 border border-rose-100 rounded-xl p-4">
-                <p className="text-sm text-gray-700">{insight.message}</p>
-                <p className="text-xs text-gray-400 mt-1.5">
+              <div key={i} className="bg-[#BD7B54]/5 border border-[#BD7B54]/20 rounded-lg p-4">
+                <p className="text-sm text-[#20241F]/80">{insight.message}</p>
+                <p className="text-xs text-[#20241F]/40 mt-1.5">
                   Based on {insight.sample_size} comparison{insight.sample_size !== 1 ? 's' : ''}
                 </p>
               </div>
             ))}
           </div>
         ) : (
-          <div className="bg-gray-50 rounded-xl p-6 text-center">
-            <p className="text-sm text-gray-500">
+          <div className="bg-[#F5F2EA] rounded-lg p-6 text-center">
+            <p className="text-sm text-[#20241F]/60">
               Insights need a bit more data to be reliable. Keep logging your daily habits and doing regular scans —
               once there are enough scan comparisons with journal entries in between, patterns will start showing up here.
             </p>
@@ -229,47 +242,52 @@ export default function JournalTab() {
       </div>
 
       {/* Past Entries */}
-      <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-        <h3 className="font-semibold text-gray-800 mb-4">Past Entries</h3>
+      <div className="rounded-lg border border-[#20241F]/12 bg-white p-6">
+        <div className="flex items-center gap-2 mb-4">
+          <CalendarDays size={16} className="text-[#BD7B54]" />
+          <h3 className="font-[family-name:var(--font-mono)] text-[11px] uppercase tracking-[0.1em] text-[#20241F]/50">
+            Past Entries
+          </h3>
+        </div>
 
         {entries.length > 0 ? (
-          <div className="space-y-3">
+          <div className="space-y-2">
             {entries.map((entry: any) => (
-              <div key={entry.id} className="border border-gray-100 rounded-xl p-4">
+              <div key={entry.id} className="border border-[#20241F]/10 rounded-lg p-4">
                 <div className="flex justify-between items-center mb-2">
-                  <p className="text-sm font-medium text-gray-800">
+                  <p className="text-sm font-medium text-[#20241F]">
                     {new Date(entry.date).toLocaleDateString('en-US', {
                       weekday: 'short', year: 'numeric', month: 'short', day: 'numeric',
                     })}
                   </p>
                 </div>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-xs text-gray-500">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-xs">
                   <div>
-                    <p className="text-gray-400">Sleep</p>
-                    <p className="font-medium text-gray-700">{entry.sleep_hours != null ? `${entry.sleep_hours}h` : '—'}</p>
+                    <p className="text-[#20241F]/40">Sleep</p>
+                    <p className="font-medium text-[#20241F]/75">{entry.sleep_hours != null ? `${entry.sleep_hours}h` : '—'}</p>
                   </div>
                   <div>
-                    <p className="text-gray-400">Water</p>
-                    <p className="font-medium text-gray-700">{entry.water_intake_liters != null ? `${entry.water_intake_liters}L` : '—'}</p>
+                    <p className="text-[#20241F]/40">Water</p>
+                    <p className="font-medium text-[#20241F]/75">{entry.water_intake_liters != null ? `${entry.water_intake_liters}L` : '—'}</p>
                   </div>
                   <div>
-                    <p className="text-gray-400">Stress</p>
-                    <p className="font-medium text-gray-700">{entry.stress_level != null ? stressLabel(entry.stress_level) : '—'}</p>
+                    <p className="text-[#20241F]/40">Stress</p>
+                    <p className="font-medium text-[#20241F]/75">{entry.stress_level != null ? stressLabel(entry.stress_level) : '—'}</p>
                   </div>
                   <div>
-                    <p className="text-gray-400">Exercise</p>
-                    <p className="font-medium text-gray-700">{entry.exercise_minutes != null ? `${entry.exercise_minutes}min` : '—'}</p>
+                    <p className="text-[#20241F]/40">Exercise</p>
+                    <p className="font-medium text-[#20241F]/75">{entry.exercise_minutes != null ? `${entry.exercise_minutes}min` : '—'}</p>
                   </div>
                 </div>
                 {entry.notes && (
-                  <p className="text-xs text-gray-500 mt-2 italic">"{entry.notes}"</p>
+                  <p className="text-xs text-[#20241F]/50 mt-2 italic">"{entry.notes}"</p>
                 )}
               </div>
             ))}
           </div>
         ) : (
           <div className="text-center py-8">
-            <p className="text-gray-400 text-sm">No journal entries yet. Log your first day above.</p>
+            <p className="text-[#20241F]/45 text-sm">No journal entries yet. Log your first day above.</p>
           </div>
         )}
       </div>

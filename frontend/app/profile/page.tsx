@@ -4,6 +4,24 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { getSkinProfile, submitQuiz } from '@/lib/api';
 import { isLoggedIn } from '@/lib/auth';
+import { Fraunces, IBM_Plex_Sans, IBM_Plex_Mono } from 'next/font/google';
+import { ArrowLeft, Pencil, X, RefreshCw, Camera, ChevronRight, User } from 'lucide-react';
+
+const fraunces = Fraunces({
+  subsets: ['latin'],
+  weight: ['500', '600'],
+  variable: '--font-display',
+});
+const plexSans = IBM_Plex_Sans({
+  subsets: ['latin'],
+  weight: ['400', '500'],
+  variable: '--font-body',
+});
+const plexMono = IBM_Plex_Mono({
+  subsets: ['latin'],
+  weight: ['400', '500'],
+  variable: '--font-mono',
+});
 
 const FIELD_OPTIONS: Record<string, string[]> = {
   age_range: ['Under 18', '18-24', '25-34', '35-44', '45+'],
@@ -83,43 +101,50 @@ export default function ProfilePage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-rose-50 flex items-center justify-center">
-        <p className="text-gray-500">Loading profile...</p>
+      <div className={`${fraunces.variable} ${plexSans.variable} ${plexMono.variable} min-h-screen bg-[#F5F2EA] font-[family-name:var(--font-body)] flex items-center justify-center`}>
+        <p className="text-[#20241F]/50 text-sm font-[family-name:var(--font-mono)]">Loading profile...</p>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-rose-50">
-      <div className="bg-white shadow-sm px-6 py-4 flex items-center">
-        <button 
-          onClick={() => router.push('/dashboard')} 
-          className="text-rose-500 font-medium text-sm cursor-pointer"
+    <div className={`${fraunces.variable} ${plexSans.variable} ${plexMono.variable} min-h-screen bg-[#F5F2EA] font-[family-name:var(--font-body)]`}>
+      <div className="border-b border-[#20241F]/10 bg-[#F5F2EA]/90 backdrop-blur-md px-6 py-4 flex items-center relative">
+        <button
+          onClick={() => router.push('/dashboard')}
+          className="text-[#20241F]/60 hover:text-[#20241F] text-sm flex items-center gap-1.5 cursor-pointer transition"
         >
-          ← Back
+          <ArrowLeft size={15} /> Back
         </button>
-        <h1 className="text-lg font-bold text-gray-800 absolute left-1/2 -translate-x-1/2">Profile</h1>
+        <h1 className="font-[family-name:var(--font-display)] text-lg font-medium text-[#20241F] absolute left-1/2 -translate-x-1/2">
+          Profile
+        </h1>
       </div>
 
-      <div className="max-w-lg mx-auto px-6 py-8 space-y-6">
-        <div className="bg-white rounded-2xl p-6 shadow-sm">
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-md font-semibold text-gray-800">Skin Profile</h2>
-            <button 
+      <div className="max-w-lg mx-auto px-6 py-8 space-y-4">
+        <div className="rounded-lg border border-[#20241F]/12 bg-white p-6">
+          <div className="flex justify-between items-center mb-5">
+            <div className="flex items-center gap-2">
+              <User size={16} className="text-[#BD7B54]" />
+              <h2 className="font-[family-name:var(--font-mono)] text-[11px] uppercase tracking-[0.1em] text-[#20241F]/50">
+                Skin Profile
+              </h2>
+            </div>
+            <button
               onClick={() => {
                 setError('');
                 setEditing(!editing);
-              }} 
-              className="text-sm text-rose-500 font-medium hover:underline cursor-pointer"
+              }}
+              className="cursor-pointer text-xs text-[#BD7B54] font-medium hover:underline flex items-center gap-1"
             >
-              {editing ? 'Cancel' : 'Edit'}
+              {editing ? <><X size={13} /> Cancel</> : <><Pencil size={13} /> Edit</>}
             </button>
           </div>
 
           <div className="space-y-3">
             {fields.map(({ key, label }) => (
-              <div key={key} className="flex justify-between items-center border-b border-gray-100 pb-2">
-                <span className="text-sm text-gray-500">{label}</span>
+              <div key={key} className="flex justify-between items-center border-b border-[#20241F]/8 pb-2.5">
+                <span className="text-sm text-[#20241F]/55">{label}</span>
                 {editing ? (
                   <select
                     value={
@@ -128,7 +153,7 @@ export default function ProfilePage() {
                         : (form[key] || '')
                     }
                     onChange={(e) => setForm({ ...form, [key]: e.target.value })}
-                    className="text-sm text-gray-800 border border-gray-200 rounded-lg px-2 py-1 w-44 focus:outline-none focus:ring-1 focus:ring-rose-300 bg-white"
+                    className="text-sm text-[#20241F] border border-[#20241F]/15 rounded-md px-2 py-1.5 w-44 focus:outline-none focus:border-[#BD7B54] bg-white"
                   >
                     <option value="" disabled>Select option</option>
                     {FIELD_OPTIONS[key]?.map((option) => (
@@ -138,7 +163,7 @@ export default function ProfilePage() {
                     ))}
                   </select>
                 ) : (
-                  <span className="text-sm font-medium text-gray-800">
+                  <span className="text-sm font-medium text-[#20241F]">
                     {key === 'concern_two'
                       ? (profile?.concern_two || 'None')
                       : (profile?.[key] || '—')}
@@ -149,7 +174,7 @@ export default function ProfilePage() {
           </div>
 
           {error && (
-            <p className="mt-3 text-xs text-red-500 bg-red-50 p-2 rounded-lg border border-red-100">
+            <p className="mt-4 text-xs text-red-600 bg-red-50 p-3 rounded-lg border border-red-100">
               {error}
             </p>
           )}
@@ -158,27 +183,37 @@ export default function ProfilePage() {
             <button
               onClick={handleSave}
               disabled={saving}
-              className="mt-4 w-full bg-rose-500 text-white rounded-lg py-2.5 text-sm font-medium hover:bg-rose-600 transition disabled:opacity-50 cursor-pointer"
+              className="mt-4 w-full cursor-pointer rounded-md bg-[#182019] py-2.5 font-[family-name:var(--font-mono)] text-xs uppercase tracking-[0.1em] text-[#F5F2EA] transition hover:bg-[#BD7B54] disabled:opacity-50"
             >
               {saving ? 'Saving...' : 'Save Changes'}
             </button>
           )}
         </div>
 
-        <div className="bg-white rounded-2xl p-6 shadow-sm">
-          <h2 className="text-md font-semibold text-gray-800 mb-4">Quick Actions</h2>
-          <div className="space-y-3">
+        <div className="rounded-lg border border-[#20241F]/12 bg-white p-6">
+          <h2 className="font-[family-name:var(--font-mono)] text-[11px] uppercase tracking-[0.1em] text-[#20241F]/50 mb-4">
+            Quick Actions
+          </h2>
+          <div className="space-y-2">
             <button
               onClick={() => router.push('/quiz?back=profile')}
-              className="w-full text-left px-4 py-3 rounded-xl border border-gray-200 text-sm text-gray-700 hover:border-rose-200 transition cursor-pointer"
+              className="w-full flex items-center justify-between text-left px-4 py-3 rounded-lg border border-[#20241F]/10 text-sm text-[#20241F]/75 hover:border-[#BD7B54]/40 transition cursor-pointer"
             >
-              🔄 Retake Quiz
+              <span className="flex items-center gap-2.5">
+                <RefreshCw size={15} className="text-[#20241F]/40" />
+                Retake Quiz
+              </span>
+              <ChevronRight size={16} className="text-[#20241F]/25" />
             </button>
             <button
               onClick={() => router.push('/scan')}
-              className="w-full text-left px-4 py-3 rounded-xl border border-gray-200 text-sm text-gray-700 hover:border-rose-200 transition cursor-pointer"
+              className="w-full flex items-center justify-between text-left px-4 py-3 rounded-lg border border-[#20241F]/10 text-sm text-[#20241F]/75 hover:border-[#BD7B54]/40 transition cursor-pointer"
             >
-              📷 New Scan
+              <span className="flex items-center gap-2.5">
+                <Camera size={15} className="text-[#20241F]/40" />
+                New Scan
+              </span>
+              <ChevronRight size={16} className="text-[#20241F]/25" />
             </button>
           </div>
         </div>

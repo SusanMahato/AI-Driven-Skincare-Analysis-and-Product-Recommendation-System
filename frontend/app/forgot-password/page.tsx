@@ -3,8 +3,26 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import axios from 'axios';
+import { Fraunces, IBM_Plex_Sans, IBM_Plex_Mono } from 'next/font/google';
+import { ArrowLeft, Mail } from 'lucide-react';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
+
+const fraunces = Fraunces({
+  subsets: ['latin'],
+  weight: ['500', '600'],
+  variable: '--font-display',
+});
+const plexSans = IBM_Plex_Sans({
+  subsets: ['latin'],
+  weight: ['400', '500'],
+  variable: '--font-body',
+});
+const plexMono = IBM_Plex_Mono({
+  subsets: ['latin'],
+  weight: ['400', '500'],
+  variable: '--font-mono',
+});
 
 export default function ForgotPasswordPage() {
   const router = useRouter();
@@ -16,7 +34,7 @@ export default function ForgotPasswordPage() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
- const handleSendOtp = async (e: React.FormEvent) => {
+  const handleSendOtp = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError('');
@@ -35,9 +53,9 @@ export default function ForgotPasswordPage() {
     } finally {
       setLoading(false);
     }
-};
+  };
 
- const handleResetPassword = async (e: React.FormEvent) => {
+  const handleResetPassword = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError('');
@@ -52,7 +70,6 @@ export default function ForgotPasswordPage() {
     } catch (err: any) {
       const detail = err.response?.data?.detail;
       if (Array.isArray(detail)) {
-        // Pydantic validation errors (422) — extract the first readable message
         setError(detail[0]?.msg || 'Please check your new password and try again.');
       } else if (typeof detail === 'string') {
         setError(detail);
@@ -62,95 +79,104 @@ export default function ForgotPasswordPage() {
     } finally {
       setLoading(false);
     }
-};
+  };
 
   return (
-    <div className="min-h-screen bg-rose-50 flex items-center justify-center px-4">
-      <div className="bg-white rounded-2xl shadow-md p-8 w-full max-w-md">
+    <div className={`${fraunces.variable} ${plexSans.variable} ${plexMono.variable} min-h-screen bg-[#F5F2EA] font-[family-name:var(--font-body)] flex items-center justify-center px-4`}>
+      <div className="bg-white rounded-lg border border-[#20241F]/12 p-8 w-full max-w-md">
 
         <div className="text-center mb-8">
-          <h1 className="text-2xl font-bold text-rose-500">SkinCare AI</h1>
-          <p className="text-gray-500 mt-1 text-sm">
-            {step === 'email' ? 'Reset your password' : 'Enter your OTP'}
+          <p className="font-[family-name:var(--font-mono)] text-xs tracking-[0.2em] text-[#BD7B54] uppercase mb-3">
+            Access · Skincare AI
           </p>
+          <h1 className="font-[family-name:var(--font-display)] text-2xl font-medium text-[#20241F]">
+            {step === 'email' ? 'Reset your password' : 'Enter your OTP'}
+          </h1>
         </div>
 
         {step === 'email' ? (
-          <form onSubmit={handleSendOtp} className="space-y-5">
+          <form onSubmit={handleSendOtp} className="space-y-6">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">Email address</label>
+              <label className="block font-[family-name:var(--font-mono)] text-[11px] tracking-[0.12em] text-[#20241F]/60 uppercase mb-2">
+                Email address
+              </label>
               <input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-rose-300 bg-white"
+                className="w-full bg-transparent border-b-2 border-[#20241F]/15 px-1 py-2 text-sm text-[#20241F] focus:outline-none focus:border-[#BD7B54] transition-colors"
                 placeholder="you@example.com"
               />
             </div>
 
             {error && (
-              <div className="bg-red-50 border border-red-200 rounded-xl px-4 py-3">
-                <p className="text-red-600 text-sm">{error}</p>
+              <div className="border-l-4 border-red-500 bg-red-500/5 px-3 py-2">
+                <p className="font-[family-name:var(--font-mono)] text-xs text-red-600">{error}</p>
               </div>
             )}
 
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-rose-500 text-white rounded-xl py-3 text-sm font-semibold hover:bg-rose-600 transition disabled:opacity-50"
+              className="w-full bg-[#182019] text-[#F5F2EA] py-3 text-sm font-[family-name:var(--font-mono)] uppercase tracking-[0.12em] hover:bg-[#BD7B54] transition-colors disabled:opacity-50 cursor-pointer rounded-md flex items-center justify-center gap-2"
             >
+              <Mail size={14} />
               {loading ? 'Sending OTP...' : 'Send OTP'}
             </button>
           </form>
         ) : (
-          <form onSubmit={handleResetPassword} className="space-y-5">
-            <div className="bg-rose-50 border border-rose-100 rounded-xl px-4 py-3">
-              <p className="text-rose-600 text-sm">OTP sent to <strong>{email}</strong>. Check your inbox.</p>
+          <form onSubmit={handleResetPassword} className="space-y-6">
+            <div className="rounded-lg border border-[#BD7B54]/25 bg-[#BD7B54]/5 px-4 py-3">
+              <p className="text-sm text-[#20241F]/75">OTP sent to <strong className="text-[#20241F]">{email}</strong>. Check your inbox.</p>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">6-digit OTP</label>
+              <label className="block font-[family-name:var(--font-mono)] text-[11px] tracking-[0.12em] text-[#20241F]/60 uppercase mb-2">
+                6-digit OTP
+              </label>
               <input
                 type="text"
                 value={otp}
                 onChange={(e) => setOtp(e.target.value)}
                 required
                 maxLength={6}
-                className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-rose-300 bg-white tracking-widest text-center text-lg font-bold"
+                className="w-full bg-transparent border-b-2 border-[#20241F]/15 px-1 py-2 text-sm text-[#20241F] focus:outline-none focus:border-[#BD7B54] transition-colors tracking-[0.3em] text-center font-[family-name:var(--font-display)] text-lg"
                 placeholder="000000"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">New Password</label>
+              <label className="block font-[family-name:var(--font-mono)] text-[11px] tracking-[0.12em] text-[#20241F]/60 uppercase mb-2">
+                New Password
+              </label>
               <input
                 type="password"
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
                 required
                 minLength={8}
-                className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-rose-300 bg-white"
+                className="w-full bg-transparent border-b-2 border-[#20241F]/15 px-1 py-2 text-sm text-[#20241F] focus:outline-none focus:border-[#BD7B54] transition-colors"
                 placeholder="Min 8 characters"
               />
             </div>
 
             {error && (
-              <div className="bg-red-50 border border-red-200 rounded-xl px-4 py-3">
-                <p className="text-red-600 text-sm">{error}</p>
+              <div className="border-l-4 border-red-500 bg-red-500/5 px-3 py-2">
+                <p className="font-[family-name:var(--font-mono)] text-xs text-red-600">{error}</p>
               </div>
             )}
 
             {success && (
-              <div className="bg-green-50 border border-green-200 rounded-xl px-4 py-3">
-                <p className="text-green-600 text-sm">{success}</p>
+              <div className="border-l-4 border-emerald-500 bg-emerald-500/5 px-3 py-2">
+                <p className="font-[family-name:var(--font-mono)] text-xs text-emerald-700">{success}</p>
               </div>
             )}
 
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-rose-500 text-white rounded-xl py-3 text-sm font-semibold hover:bg-rose-600 transition disabled:opacity-50"
+              className="w-full bg-[#182019] text-[#F5F2EA] py-3 text-sm font-[family-name:var(--font-mono)] uppercase tracking-[0.12em] hover:bg-[#BD7B54] transition-colors disabled:opacity-50 cursor-pointer rounded-md"
             >
               {loading ? 'Resetting...' : 'Reset Password'}
             </button>
@@ -158,16 +184,16 @@ export default function ForgotPasswordPage() {
             <button
               type="button"
               onClick={() => setStep('email')}
-              className="w-full text-gray-500 text-sm hover:text-gray-700 transition"
+              className="w-full text-[#20241F]/50 text-sm hover:text-[#20241F] transition cursor-pointer flex items-center justify-center gap-1.5"
             >
-              ← Back
+              <ArrowLeft size={13} /> Back
             </button>
           </form>
         )}
 
-        <p className="text-center text-sm text-gray-500 mt-6">
+        <p className="text-center text-sm text-[#20241F]/55 mt-8">
           Remember your password?{' '}
-          <a href="/login" className="text-rose-500 font-semibold hover:underline">
+          <a href="/login" className="text-[#BD7B54] font-medium hover:underline underline-offset-2 cursor-pointer">
             Sign in
           </a>
         </p>
