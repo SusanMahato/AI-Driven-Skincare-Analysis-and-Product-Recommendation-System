@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Fraunces, IBM_Plex_Sans, IBM_Plex_Mono } from 'next/font/google';
 import { registerUser } from '@/lib/api';
+import Image from 'next/image';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
 
@@ -68,11 +69,14 @@ export default function RegisterPage() {
         className={`${fraunces.variable} ${plexSans.variable} ${plexMono.variable} min-h-screen flex bg-[#F5F2EA] font-[family-name:var(--font-body)]`}
       >
         <div className="hidden lg:block relative w-2/5 overflow-hidden bg-[#182019]">
-          <img
-            src="/skincare-hero.jpeg"
-            alt="Skincare atmosphere"
-            className="absolute inset-0 w-full h-full object-cover grayscale contrast-110"
-          />
+          <Image
+           src="/skincare-hero.jpeg"
+           alt="Skincare atmosphere"
+           fill
+           priority
+           sizes="40vw"
+           className="object-cover grayscale contrast-110"
+           />
           <div
             className="absolute inset-0 mix-blend-color"
             style={{

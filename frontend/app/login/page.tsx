@@ -7,6 +7,7 @@ import { Fraunces, IBM_Plex_Sans, IBM_Plex_Mono } from 'next/font/google';
 import { loginUser } from '@/lib/api';
 import { saveToken } from '@/lib/auth';
 import { CheckCircle2, X } from 'lucide-react';
+import Image from 'next/image'; 
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
 
@@ -78,11 +79,14 @@ function LoginContent() {
       className={`${fraunces.variable} ${plexSans.variable} ${plexMono.variable} min-h-screen flex bg-[#F5F2EA] font-[family-name:var(--font-body)]`}
     >
       <div className="hidden lg:block relative w-2/5 overflow-hidden bg-[#182019]">
-        <img
-          src="/skincare-hero.jpeg"
-          alt="Skincare atmosphere"
-          className="absolute inset-0 w-full h-full object-cover grayscale contrast-110"
-        />
+        <Image
+         src="/skincare-hero.jpeg"
+         alt="Skincare atmosphere"
+         fill
+         priority
+         sizes="40vw"
+         className="object-cover grayscale contrast-110"
+         />
         <div
           className="absolute inset-0 mix-blend-color"
           style={{
@@ -289,7 +293,7 @@ function LoginContent() {
             href={`${API_BASE_URL}/auth/google`}
             className="w-full flex items-center justify-center gap-3 border border-[#20241F]/15 py-3 text-sm font-medium text-[#20241F]/80 hover:bg-[#20241F]/5 transition-colors cursor-pointer rounded-md"
           >
-            <img src="https://www.google.com/favicon.ico" width="16" height="16" alt="Google logo" />
+            <Image src="https://www.google.com/favicon.ico" width={16} height={16} alt="Google logo" />
             Sign in with Google
           </a>
 
