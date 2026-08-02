@@ -60,36 +60,31 @@ function LoginContent() {
     setLoading(true);
     setError('');
     try {
-      const handleLogin = async (e: React.FormEvent) => {
-  e.preventDefault();
-  setLoading(true);
-  setError('');
-  try {
-    const response = await loginUser(email, password);
-    saveToken(response.data.access_token);
-    setSuccess('Login successful. Redirecting you now.');
+      const response = await loginUser(email, password);
+      saveToken(response.data.access_token);
+      setSuccess('Login successful. Redirecting you now.');
 
-    let target = redirect.startsWith('/') ? redirect : `/${redirect}`;
+      let target = redirect.startsWith('/') ? redirect : `/${redirect}`;
 
-    // Match Google OAuth's onboarding behavior: first-time users without a
-    // skin profile go straight to the quiz, not an empty dashboard.
-    if (!searchParams.get('redirect')) {
-      try {
-        await getSkinProfile();
-      } catch {
-        target = '/quiz';
+      // Match Google OAuth's onboarding behavior: first-time users without a
+      // skin profile go straight to the quiz, not an empty dashboard.
+      if (!searchParams.get('redirect')) {
+        try {
+          await getSkinProfile();
+        } catch {
+          target = '/quiz';
+        }
       }
-    }
 
-    setTimeout(() => {
-      router.push(target);
-    }, 900);
-  } catch (err: any) {
-    const detail = err.response?.data?.detail;
-    setError(typeof detail === 'string' ? detail : 'Invalid email or password. Please try again.');
-    setLoading(false);
-  }
-};
+      setTimeout(() => {
+        router.push(target);
+      }, 900);
+    } catch (err: any) {
+      const detail = err.response?.data?.detail;
+      setError(typeof detail === 'string' ? detail : 'Invalid email or password. Please try again.');
+      setLoading(false);
+    }
+  };
 
   return (
     <div
