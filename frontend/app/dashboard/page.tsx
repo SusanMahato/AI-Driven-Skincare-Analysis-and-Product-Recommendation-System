@@ -9,6 +9,7 @@ import ProductTabs from '@/components/ProductTabs';
 import JournalTab from '@/components/JournalTab';
 import { SKIN_CONDITIONS, CHART_LINE_COLORS } from '@/lib/constants';
 import type { Scan, Recommendation, ComparisonResult } from '@/lib/types';
+import Image from 'next/image';
 
 import { Fraunces, IBM_Plex_Sans, IBM_Plex_Mono } from 'next/font/google';
 import {
@@ -503,12 +504,15 @@ export default function DashboardPage() {
                       }`}
                     >
                       {scan.photo_url ? (
-                        <img
-                          src={`${API_BASE_URL}${scan.photo_url}`}
-                          alt="Scan"
-                          className="w-14 h-14 object-cover rounded-md border border-[#20241F]/10 flex-shrink-0"
+                       <div className="relative w-14 h-14 rounded-md border border-[#20241F]/10 flex-shrink-0 overflow-hidden">
+                       <Image
+                        src={`${API_BASE_URL}${scan.photo_url}`}
+                        alt="Scan"
+                        fill
+                        className="object-cover"
                         />
-                      ) : (
+                         </div>
+                        ) : (
                         <div className="w-14 h-14 rounded-md border border-[#20241F]/10 bg-[#F5F2EA] flex items-center justify-center flex-shrink-0">
                           <Camera size={18} className="text-[#20241F]/30" />
                         </div>
@@ -583,12 +587,15 @@ export default function DashboardPage() {
             </p>
 
             {selectedScan.photo_url && (
-              <img
-                src={`${API_BASE_URL}${selectedScan.photo_url}`}
+           <div className="relative w-full h-56 rounded-lg border border-[#20241F]/10 mb-6 overflow-hidden">
+              <Image
+               src={`${API_BASE_URL}${selectedScan.photo_url}`}
                 alt="Scan detail"
-                className="w-full h-56 object-cover rounded-lg border border-[#20241F]/10 mb-6"
-              />
-            )}
+                fill
+                className="object-cover"
+                />
+                </div>
+               )}
 
             <div className="space-y-3">
               {SKIN_CONDITIONS.map(({ label, key }) => {
@@ -669,12 +676,15 @@ export default function DashboardPage() {
                   Older Scan
                 </h4>
                 {comparisonResult.older_scan?.photo_url && (
-                  <img
-                    src={`${API_BASE_URL}${comparisonResult.older_scan.photo_url}`}
-                    alt="Older Scan"
-                    className="w-full h-48 object-cover rounded-md border border-[#20241F]/10"
-                  />
-                )}
+                <div className="relative w-full h-48 rounded-md border border-[#20241F]/10 overflow-hidden">
+                <Image
+                 src={`${API_BASE_URL}${comparisonResult.older_scan.photo_url}`}
+                 alt="Older Scan"
+                 fill
+                 className="object-cover"
+                 />
+                  </div>
+                 )}
                 <p className="text-xs text-[#20241F]/45 mt-3">
                   {new Date(comparisonResult.older_scan.created_at).toLocaleString()}
                 </p>
@@ -685,12 +695,15 @@ export default function DashboardPage() {
                   Newer Scan
                 </h4>
                 {comparisonResult.newer_scan?.photo_url && (
-                  <img
-                    src={`${API_BASE_URL}${comparisonResult.newer_scan.photo_url}`}
-                    alt="Newer Scan"
-                    className="w-full h-48 object-cover rounded-md border border-[#20241F]/10"
-                  />
-                )}
+                 <div className="relative w-full h-48 rounded-md border border-[#20241F]/10 overflow-hidden">
+                 <Image
+                 src={`${API_BASE_URL}${comparisonResult.newer_scan.photo_url}`}
+                 alt="Newer Scan"
+                 fill
+                className="object-cover"
+                 />
+                </div>
+                 )}
                 <p className="text-xs text-[#20241F]/45 mt-3">
                   {new Date(comparisonResult.newer_scan.created_at).toLocaleString()}
                 </p>
