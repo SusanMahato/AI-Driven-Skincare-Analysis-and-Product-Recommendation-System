@@ -1,7 +1,20 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'ai-driven-skincare-analysis-and-product.onrender.com',
+        pathname: '/uploaded_scans/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'www.google.com',
+        pathname: '/favicon.ico',
+      },
+    ],
+  },
 };
 
 export default nextConfig;
