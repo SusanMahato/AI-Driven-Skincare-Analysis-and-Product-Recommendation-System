@@ -186,11 +186,11 @@ export default function DashboardPage() {
   return (
     <div className={`${fraunces.variable} ${plexSans.variable} ${plexMono.variable} min-h-screen bg-[#F5F2EA] font-[family-name:var(--font-body)]`}>
       {/* Header */}
-      <div className="sticky top-0 z-10 border-b border-[#20241F]/10 bg-[#F5F2EA]/90 backdrop-blur-md px-6 py-4 flex justify-between items-center">
-       <span className="font-[family-name:var(--font-display)] text-lg sm:text-xl font-medium text-[#20241F] whitespace-nowrap">
+       <div className="sticky top-0 z-10 border-b border-[#20241F]/10 bg-[#F5F2EA]/90 backdrop-blur-md px-4 sm:px-6 py-4 flex flex-wrap justify-between items-center gap-y-3">
+        <span className="font-[family-name:var(--font-display)] text-lg sm:text-xl font-medium text-[#20241F] whitespace-nowrap">
          SkinCare AI
-        </span>
-        <div className="flex gap-2">
+          </span>
+          <div className="flex gap-2">
           <button
             onClick={() => router.push('/scan')}
             className="cursor-pointer rounded-md bg-[#182019] px-3 sm:px-4 py-2 text-sm font-[family-name:var(--font-mono)] uppercase tracking-[0.08em] text-[#F5F2EA] transition hover:bg-[#BD7B54] flex items-center gap-2"
