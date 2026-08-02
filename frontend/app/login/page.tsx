@@ -4,10 +4,10 @@ import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { Fraunces, IBM_Plex_Sans, IBM_Plex_Mono } from 'next/font/google';
-import { loginUser } from '@/lib/api';
 import { saveToken } from '@/lib/auth';
 import { CheckCircle2, X } from 'lucide-react';
 import Image from 'next/image'; 
+import { loginUser, getSkinProfile } from '@/lib/api';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
 
@@ -60,19 +60,36 @@ function LoginContent() {
     setLoading(true);
     setError('');
     try {
-      const response = await loginUser(email, password);
-      saveToken(response.data.access_token);
-      setSuccess('Login successful. Redirecting you now.');
-      const target = redirect.startsWith('/') ? redirect : `/${redirect}`;
-      setTimeout(() => {
-        router.push(target);
-      }, 900);
-    } catch (err: any) {
-      const detail = err.response?.data?.detail;
-      setError(typeof detail === 'string' ? detail : 'Invalid email or password. Please try again.');
-      setLoading(false);
+      const handleLogin = async (e: React.FormEvent) => {
+  e.preventDefault();
+  setLoading(true);
+  setError('');
+  try {
+    const response = await loginUser(email, password);
+    saveToken(response.data.access_token);
+    setSuccess('Login successful. Redirecting you now.');
+
+    let target = redirect.startsWith('/') ? redirect : `/${redirect}`;
+
+    // Match Google OAuth's onboarding behavior: first-time users without a
+    // skin profile go straight to the quiz, not an empty dashboard.
+    if (!searchParams.get('redirect')) {
+      try {
+        await getSkinProfile();
+      } catch {
+        target = '/quiz';
+      }
     }
-  };
+
+    setTimeout(() => {
+      router.push(target);
+    }, 900);
+  } catch (err: any) {
+    const detail = err.response?.data?.detail;
+    setError(typeof detail === 'string' ? detail : 'Invalid email or password. Please try again.');
+    setLoading(false);
+  }
+};
 
   return (
     <div
