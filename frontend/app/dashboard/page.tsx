@@ -186,8 +186,8 @@ export default function DashboardPage() {
     <div className={`${fraunces.variable} ${plexSans.variable} ${plexMono.variable} min-h-screen bg-[#F5F2EA] font-[family-name:var(--font-body)]`}>
       {/* Header */}
       <div className="sticky top-0 z-10 border-b border-[#20241F]/10 bg-[#F5F2EA]/90 backdrop-blur-md px-6 py-4 flex justify-between items-center">
-        <span className="font-[family-name:var(--font-display)] text-xl font-medium text-[#20241F]">
-          SkinCare AI
+       <span className="font-[family-name:var(--font-display)] text-lg sm:text-xl font-medium text-[#20241F] whitespace-nowrap">
+         SkinCare AI
         </span>
         <div className="flex gap-2">
           <button
