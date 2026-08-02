@@ -11,7 +11,7 @@ from app.core.dependencies import get_current_user
 from app.core.limiter import limiter
 from app.models.scan import Scan
 from app.models.user import User
-from app.services.cv_service import analyze_skin, check_photo_quality
+from app.services.cv_service import analyze_skin, check_photo_quality, detect_face
 from app.services.weather_service import get_full_weather
 
 logger = logging.getLogger("skincare_api")
@@ -115,10 +115,18 @@ async def analyze(
     # Read image
     image_bytes = await file.read()
 
-    # Validate the upload BEFORE processing
+    # Validate the upload BEFORE processing — type, size, and real image content
     file_extension = validate_uploaded_image(file, image_bytes)
 
-    # Check photo quality (blur/brightness/etc.)
+    # Reject images with no detectable face before running any further processing —
+    # a valid image file (e.g. a document photo) isn't necessarily a face photo.
+    if not detect_face(image_bytes):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="No face detected. Please upload a clear photo of your face, facing the camera directly."
+        )
+
+    # Check photo quality (blur/brightness/etc.) after confirming it's a real, valid image
     quality = check_photo_quality(image_bytes)
     if not quality["passed"]:
         raise HTTPException(
