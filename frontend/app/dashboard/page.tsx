@@ -66,6 +66,7 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('overview');
   const [selectedScan, setSelectedScan] = useState<Scan | null>(null);
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
   // Scan comparison state
   const [compareMode, setCompareMode] = useState(false);
@@ -186,9 +187,9 @@ export default function DashboardPage() {
   return (
     <div className={`${fraunces.variable} ${plexSans.variable} ${plexMono.variable} min-h-screen bg-[#F5F2EA] font-[family-name:var(--font-body)]`}>
       {/* Header */}
-       <div className="sticky top-0 z-10 border-b border-[#20241F]/10 bg-[#F5F2EA]/90 backdrop-blur-md px-4 sm:px-6 py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+      <div className="sticky top-0 z-10 border-b border-[#20241F]/10 bg-[#F5F2EA]/90 backdrop-blur-md px-4 sm:px-6 py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <span className="font-[family-name:var(--font-display)] text-lg sm:text-xl font-medium text-[#20241F] whitespace-nowrap">
-         SkinCare AI
+          SkinCare AI
         </span>
         <div className="flex flex-wrap gap-2">
           <button
@@ -206,7 +207,7 @@ export default function DashboardPage() {
             Profile
           </button>
           <button
-            onClick={() => { removeToken(); router.push('/login?logout=success'); }}
+            onClick={() => setShowLogoutConfirm(true)}
             className="cursor-pointer rounded-md border border-red-300/50 px-4 py-2 text-sm font-[family-name:var(--font-mono)] uppercase tracking-[0.08em] text-red-600/80 transition hover:bg-red-50 flex items-center gap-2"
           >
             <LogOut size={15} />
@@ -504,15 +505,15 @@ export default function DashboardPage() {
                       }`}
                     >
                       {scan.photo_url ? (
-                       <div className="relative w-14 h-14 rounded-md border border-[#20241F]/10 flex-shrink-0 overflow-hidden">
-                       <Image
-                        src={`${API_BASE_URL}${scan.photo_url}`}
-                        alt="Scan"
-                        fill
-                        className="object-cover"
-                        />
-                         </div>
-                        ) : (
+                        <div className="relative w-14 h-14 rounded-md border border-[#20241F]/10 flex-shrink-0 overflow-hidden">
+                          <Image
+                            src={`${API_BASE_URL}${scan.photo_url}`}
+                            alt="Scan"
+                            fill
+                            className="object-cover"
+                          />
+                        </div>
+                      ) : (
                         <div className="w-14 h-14 rounded-md border border-[#20241F]/10 bg-[#F5F2EA] flex items-center justify-center flex-shrink-0">
                           <Camera size={18} className="text-[#20241F]/30" />
                         </div>
@@ -587,15 +588,15 @@ export default function DashboardPage() {
             </p>
 
             {selectedScan.photo_url && (
-           <div className="relative w-full h-56 rounded-lg border border-[#20241F]/10 mb-6 overflow-hidden">
-              <Image
-               src={`${API_BASE_URL}${selectedScan.photo_url}`}
-                alt="Scan detail"
-                fill
-                className="object-cover"
+              <div className="relative w-full h-56 rounded-lg border border-[#20241F]/10 mb-6 overflow-hidden">
+                <Image
+                  src={`${API_BASE_URL}${selectedScan.photo_url}`}
+                  alt="Scan detail"
+                  fill
+                  className="object-cover"
                 />
-                </div>
-               )}
+              </div>
+            )}
 
             <div className="space-y-3">
               {SKIN_CONDITIONS.map(({ label, key }) => {
@@ -676,15 +677,15 @@ export default function DashboardPage() {
                   Older Scan
                 </h4>
                 {comparisonResult.older_scan?.photo_url && (
-                <div className="relative w-full h-48 rounded-md border border-[#20241F]/10 overflow-hidden">
-                <Image
-                 src={`${API_BASE_URL}${comparisonResult.older_scan.photo_url}`}
-                 alt="Older Scan"
-                 fill
-                 className="object-cover"
-                 />
+                  <div className="relative w-full h-48 rounded-md border border-[#20241F]/10 overflow-hidden">
+                    <Image
+                      src={`${API_BASE_URL}${comparisonResult.older_scan.photo_url}`}
+                      alt="Older Scan"
+                      fill
+                      className="object-cover"
+                    />
                   </div>
-                 )}
+                )}
                 <p className="text-xs text-[#20241F]/45 mt-3">
                   {new Date(comparisonResult.older_scan.created_at).toLocaleString()}
                 </p>
@@ -695,15 +696,15 @@ export default function DashboardPage() {
                   Newer Scan
                 </h4>
                 {comparisonResult.newer_scan?.photo_url && (
-                 <div className="relative w-full h-48 rounded-md border border-[#20241F]/10 overflow-hidden">
-                 <Image
-                 src={`${API_BASE_URL}${comparisonResult.newer_scan.photo_url}`}
-                 alt="Newer Scan"
-                 fill
-                className="object-cover"
-                 />
-                </div>
-                 )}
+                  <div className="relative w-full h-48 rounded-md border border-[#20241F]/10 overflow-hidden">
+                    <Image
+                      src={`${API_BASE_URL}${comparisonResult.newer_scan.photo_url}`}
+                      alt="Newer Scan"
+                      fill
+                      className="object-cover"
+                    />
+                  </div>
+                )}
                 <p className="text-xs text-[#20241F]/45 mt-3">
                   {new Date(comparisonResult.newer_scan.created_at).toLocaleString()}
                 </p>
@@ -750,6 +751,37 @@ export default function DashboardPage() {
                   );
                 })}
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Logout Confirmation Modal */}
+      {showLogoutConfirm && (
+        <div className="fixed inset-0 z-50 bg-[#20241F]/50 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white rounded-lg max-w-sm w-full p-6 border border-[#20241F]/10">
+            <h3 className="font-[family-name:var(--font-display)] text-lg font-medium text-[#20241F] mb-2">
+              Log out?
+            </h3>
+            <p className="text-sm text-[#20241F]/60 mb-6">
+              Are you sure you want to log out of your account?
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowLogoutConfirm(false)}
+                className="flex-1 cursor-pointer rounded-md border border-[#20241F]/15 py-2.5 text-sm font-[family-name:var(--font-mono)] uppercase tracking-[0.08em] text-[#20241F]/70 transition hover:bg-[#F5F2EA]"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => {
+                  removeToken();
+                  router.push('/login?logout=success');
+                }}
+                className="flex-1 cursor-pointer rounded-md bg-red-600 py-2.5 text-sm font-[family-name:var(--font-mono)] uppercase tracking-[0.08em] text-white transition hover:bg-red-700"
+              >
+                Log out
+              </button>
             </div>
           </div>
         </div>
