@@ -290,7 +290,7 @@ CATEGORY_MAP_ORDERED = [
 def normalize_category(raw: str) -> str:
     if not raw or str(raw) == "nan":
         return "other"
-    raw_lower = str(raw).lower().strip()
+    raw_lower = str(raw).lower().strip().replace("_", " ")
     for key, val in CATEGORY_MAP_ORDERED:
         if key in raw_lower:
             return val
