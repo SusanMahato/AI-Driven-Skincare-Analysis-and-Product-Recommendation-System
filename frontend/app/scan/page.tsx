@@ -130,9 +130,10 @@ export default function ScanPage() {
             <input
               type="file"
               accept="image/*"
+              capture="user"
               onChange={handleFileChange}
               className="hidden"
-            />
+               />
           </label>
 
           {preview && (

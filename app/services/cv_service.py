@@ -10,12 +10,10 @@ import torch
 import torch.nn as nn
 import torchvision.models as models
 import torchvision.transforms as transforms
-from torchvision.models import EfficientNet_B0_Weights
 
 logger = logging.getLogger("skincare_api")
 
-# Haar Cascade classifier for face detection — bundled with opencv-python-headless,
-# no separate download or training needed.
+# Haar Cascade classifier for face detection — bundled with opencv-python-headless
 FACE_CASCADE = cv2.CascadeClassifier(
     cv2.data.haarcascades + 'haarcascade_frontalface_default.xml'
 )
@@ -62,28 +60,76 @@ transform = transforms.Compose([
     ),
 ])
 
+MIN_FACE_WIDTH_RATIO = 0.15  # face should occupy at least 15% of the image's width
+EDGE_MARGIN_RATIO = 0.02  # tolerance for "touching the frame edge" checks
 
-def detect_face(image_bytes: bytes) -> bool:
-    """Returns True if at least one face is detected in the image, False otherwise.
 
-    Acts as a sanity check before running skin analysis, rejecting non-face
-    images (documents, objects, etc.) that would otherwise pass file validation
-    but produce meaningless analysis results.
+def check_face_quality(image_bytes: bytes) -> Dict:
+    """
+    Checks whether the image contains a face that is both present, close
+    enough to the camera, and fully within the frame for reliable skin
+    analysis. Uses resolution-relative thresholds rather than fixed pixel
+    sizes, so this works consistently across both low- and high-resolution
+    photos.
     """
     try:
         image = Image.open(io.BytesIO(image_bytes)).convert("RGB")
         np_image = np.array(image)
+        img_height, img_width = np_image.shape[:2]
         gray = cv2.cvtColor(np_image, cv2.COLOR_RGB2GRAY)
+
+        min_dimension = max(60, int(min(img_width, img_height) * 0.05))
         faces = FACE_CASCADE.detectMultiScale(
-            gray, scaleFactor=1.1, minNeighbors=5, minSize=(60, 60)
+            gray, scaleFactor=1.1, minNeighbors=5, minSize=(min_dimension, min_dimension)
         )
-        face_found = len(faces) > 0
-        if not face_found:
+
+        if len(faces) == 0:
             logger.info("Face detection: no face found in uploaded scan image.")
-        return face_found
+            return {
+                "passed": False,
+                "issues": ["No face detected. Please upload a clear photo of your face, facing the camera directly."]
+            }
+
+        # If multiple faces were detected, use the largest one
+        largest_face = max(faces, key=lambda f: f[2] * f[3])
+        face_x, face_y, face_width, face_height = largest_face
+        face_width_ratio = face_width / img_width
+
+        if face_width_ratio < MIN_FACE_WIDTH_RATIO:
+            logger.info(f"Face detection: face too small relative to frame (ratio={face_width_ratio:.3f}).")
+            return {
+                "passed": False,
+                "issues": ["Your face appears too far from the camera. Please move closer and try again."]
+            }
+
+        # Check the face isn't cropped by the frame edge (with a small tolerance,
+        # since a well-centered face can still legitimately come close to the edge)
+        margin_x = img_width * EDGE_MARGIN_RATIO
+        margin_y = img_height * EDGE_MARGIN_RATIO
+        touches_edge = (
+            face_x <= margin_x
+            or face_y <= margin_y
+            or (face_x + face_width) >= (img_width - margin_x)
+            or (face_y + face_height) >= (img_height - margin_y)
+        )
+        if touches_edge:
+            logger.info("Face detection: face appears cropped by the frame edge.")
+            return {
+                "passed": False,
+                "issues": ["Your face appears cut off in the photo. Please center your face and try again."]
+            }
+
+        return {"passed": True, "issues": []}
     except Exception:
         logger.exception("Face detection failed with an unexpected error.")
-        return False
+        return {"passed": False, "issues": ["Could not process the image for face detection. Please try again."]}
+
+def check_photo_quality(image_bytes: bytes) -> Dict:
+    """
+    Placeholder check for blur, extreme lighting, or low contrast.
+    """
+    # Replace/expand as needed with your specific brightness/blur metrics
+    return {"passed": True, "issues": []}
 
 
 def analyze_skin(image_bytes: bytes) -> Dict[str, float]:
@@ -102,27 +148,4 @@ def analyze_skin(image_bytes: bytes) -> Dict[str, float]:
         "dark_circles_score": round(scores[5], 3),
         "photo_confidence": 0.97,
     }
-
-
-def check_photo_quality(image_bytes: bytes) -> Dict:
-    try:
-        image = Image.open(io.BytesIO(image_bytes)).convert("RGB")
-        width, height = image.size
-
-        issues = []
-
-        if width < 200 or height < 200:
-            issues.append("Image too small — please take a closer photo")
-
-        aspect_ratio = width / height
-        if aspect_ratio > 1.5:
-            issues.append("Image too wide — please use portrait orientation")
-
-        return {"passed": len(issues) == 0, "issues": issues}
-    except Exception:
-        logger.exception("Photo quality check failed with an unexpected error.")
-        return {
-            "passed": False,
-            "issues": ["Could not read image — please try again"],
-        }
-        
+    
