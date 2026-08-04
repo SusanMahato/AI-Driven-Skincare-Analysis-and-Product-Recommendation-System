@@ -229,6 +229,7 @@ def ingredient_engine(
     night = night[:8]
 
     conflict_warnings = []
+    seen_pairs = set()
     all_placed = morning + night
     for ing in all_placed:
         for conflict in ing["conflict_with"]:
@@ -236,9 +237,18 @@ def ingredient_engine(
                 (i for i in all_placed if conflict.lower() in i["name"].lower()), None
             )
             if conflicting:
-                warning = f"{ing['name']} conflicts with {conflicting['name']} — use at different times"
-                if warning not in conflict_warnings:
-                    conflict_warnings.append(warning)
+                pair_key = frozenset([ing["name"].lower(), conflicting["name"].lower()])
+                if pair_key in seen_pairs:
+                    continue
+                seen_pairs.add(pair_key)
+
+                same_time = ing["safe_time"] == conflicting["safe_time"] and ing["safe_time"] != "both"
+                if same_time:
+                    warning = f"{ing['name']} and {conflicting['name']} shouldn't be used together — consider alternating days"
+                else:
+                    warning = f"{ing['name']} and {conflicting['name']} are kept separate (morning/night) to avoid irritation"
+
+                conflict_warnings.append(warning)
 
     return {
         "morning": morning,
