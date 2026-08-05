@@ -9,7 +9,6 @@ from app.models.user import User
 from app.services.quiz_service import get_skin_profile
 from app.services.recommendation_service import (
     generate_skin_report,
-    get_recommended_ingredients,
     get_spf_recommendation,
     ingredient_engine,
     product_engine,
@@ -69,14 +68,22 @@ def get_latest_recommendation(
         "uv_index": scan.uv_index
     }
 
-    ingredients = get_recommended_ingredients(cv_scores, skin_profile_dict)
+    # Now uses the same ingredient_engine() as /products, instead of the old
+    # separate get_recommended_ingredients() — single source of truth so the
+    # Overview tab's ingredient list can never disagree with the Products tab.
+    ranked_ingredients = ingredient_engine(cv_scores, skin_profile_dict, weather, db)
+    ingredient_names = [
+        i["name"] for i in ranked_ingredients.get("morning", []) + ranked_ingredients.get("night", [])
+    ]
+    ingredient_names = list(dict.fromkeys(ingredient_names))  # dedupe, preserve order
+
     spf = get_spf_recommendation(scan.uv_index)
-    skin_report = generate_skin_report(cv_scores, skin_profile_dict, weather, ingredients)
+    skin_report = generate_skin_report(cv_scores, skin_profile_dict, weather, ingredient_names)
 
     logger.info(f"Recommendation generated: user_id={current_user.id}, scan_id={scan.id}")
 
     return {
-        "ingredients": ingredients,
+        "ingredients": ingredient_names,
         "recommended_spf": spf,
         "morning_routine": ["Cleanser", "Serum", f"SPF {spf}"],
         "night_routine": ["Cleanser", "Moisturizer"],
