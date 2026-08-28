@@ -4,5 +4,5 @@
 # Everything else the tests need (fastapi, sqlalchemy, torch, opencv,
 # python-jose, passlib, groq, httpx, ...) is already in requirements.txt.
 
-pytest==8.3.4
+pytest==9.0.3
 pytest-cov==6.0.0
