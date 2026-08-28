@@ -195,7 +195,7 @@ def get_scan_history(
 ):
     scans = db.query(Scan).filter(
         Scan.user_id == current_user.id
-    ).order_by(Scan.created_at.desc()).all()
+    ).order_by(Scan.created_at.desc(), Scan.id.desc()).all()
     return scans
 
 

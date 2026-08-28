@@ -1,0 +1,8 @@
+# Install alongside the project's existing requirements.txt:
+#   pip install -r requirements.txt -r requirements-test.txt
+#
+# Everything else the tests need (fastapi, sqlalchemy, torch, opencv,
+# python-jose, passlib, groq, httpx, ...) is already in requirements.txt.
+
+pytest==8.3.4
+pytest-cov==6.0.0

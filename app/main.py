@@ -134,3 +134,7 @@ app.include_router(journal.router)
 @app.get("/")
 def root():
     return {"message": "Skincare API is running"}
+
+@app.head("/")
+def root_head():
+    return {}
