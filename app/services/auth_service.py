@@ -2,7 +2,8 @@ from sqlalchemy.orm import Session
 from app.models.user import User
 from app.schemas.auth import UserRegister
 from passlib.context import CryptContext
-from jose import JWTError, jwt
+import jwt
+from jwt.exceptions import InvalidTokenError
 from datetime import datetime, timedelta
 from app.core.config import settings
 from app.services.email_service import send_verification_email
