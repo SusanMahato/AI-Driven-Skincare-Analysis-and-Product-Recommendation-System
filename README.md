@@ -168,10 +168,10 @@ Runs at `http://localhost:3000`
 **Environment variables** — create `.env` in the project root:
 
 ```env
-DATABASE_URL=postgresql://user:password@host:5432/skincare_db
+DATABASE_URL=
 SECRET_KEY=
-ALGORITHM=HS256
-ACCESS_TOKEN_EXPIRE_MINUTES=30
+ALGORITHM=
+ACCESS_TOKEN_EXPIRE_MINUTES=
 OPENWEATHERMAP_API_KEY=
 OPENUV_API_KEY=
 GROQ_API_KEY=
