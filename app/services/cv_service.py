@@ -9,15 +9,11 @@ import onnxruntime as ort
 
 logger = logging.getLogger('skincare_api')
 
-FACE_CASCADE = cv2.CascadeClassifier(
-    cv2.data.haarcascades + 'haarcascade_frontalface_default.xml'
-)
+FACE_CASCADE = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
 if FACE_CASCADE.empty():
     logger.error('Failed to load Haar Cascade face detection classifier.')
 
-MODEL_PATH = os.path.join(
-    os.path.dirname(__file__), '..', 'models_weights', 'skin_model.onnx'
-)
+MODEL_PATH = os.path.join(os.path.dirname(__file__), '..', 'models_weights', 'skin_model.onnx')
 
 def load_model():
     if os.path.exists(MODEL_PATH):
@@ -29,7 +25,6 @@ def load_model():
         return None
 
 session = load_model()
-
 MIN_FACE_WIDTH_RATIO = 0.15
 EDGE_MARGIN_RATIO = 0.02
 
