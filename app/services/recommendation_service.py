@@ -96,13 +96,16 @@ def generate_skin_report(
         "usage warnings, and realistic expectations. Maximum 200 words."
     )
 
-    response = client.chat.completions.create(
-        model="llama-3.3-70b-versatile",
-        messages=[{"role": "user", "content": prompt}],
-        max_tokens=1024
-    )
+    try:
+        response = client.chat.completions.create(
+            model="openai/gpt-oss-120b",
+            messages=[{"role": "user", "content": prompt}],
+            max_tokens=1024
+        )
+        return response.choices[0].message.content
+    except Exception:
+        return "Your personalized skin report couldn't be generated right now. Please check back shortly."
 
-    return response.choices[0].message.content
 
 
 # ─────────────────────────────────────────────
@@ -362,7 +365,7 @@ def generate_why_it_suits_you(product_name: str, matched_ingredients: list, cv_s
 
     try:
         response = client.chat.completions.create(
-            model="llama-3.3-70b-versatile",
+            model="openai/gpt-oss-120b",
             messages=[{"role": "user", "content": prompt}],
             max_tokens=60
         )
@@ -461,37 +464,6 @@ def product_engine(
 
     budget = [p for p in diverse_products if p["price_tier"] == "budget"]
     premium = [p for p in diverse_products if p["price_tier"] == "premium"]
-
-    # Generate LLM explanations for top 10 only
-    top_products = diverse_products[:10]
-    for p in top_products:
-        p["why_it_suits_you"] = generate_why_it_suits_you(
-            p["name"], p["matched_ingredients"], cv_scores
-        )
-
-    # Best match — no product reused across morning and night
-    morning_products = [p for p in diverse_products if p["safe_time"] in ["morning", "both"]]
-    night_products = [p for p in diverse_products if p["safe_time"] in ["night", "both"]]
-    best_morning, used_best = build_routine(morning_products, ROUTINE_STEPS_MORNING)
-    best_night, _ = build_routine(night_products, ROUTINE_STEPS_NIGHT, exclude_ids=used_best)
-
-    # Budget picks — no product reused across morning and night
-    budget_morning_products = [p for p in budget if p["safe_time"] in ["morning", "both"]]
-    budget_night_products = [p for p in budget if p["safe_time"] in ["night", "both"]]
-    budget_morning, used_budget = build_routine(budget_morning_products, ROUTINE_STEPS_MORNING)
-    budget_night, _ = build_routine(budget_night_products, ROUTINE_STEPS_NIGHT, exclude_ids=used_budget)
-
-    # Premium — no product reused across morning and night
-    premium_morning_products = [p for p in premium if p["safe_time"] in ["morning", "both"]]
-    premium_night_products = [p for p in premium if p["safe_time"] in ["night", "both"]]
-    premium_morning, used_premium = build_routine(premium_morning_products, ROUTINE_STEPS_MORNING)
-    premium_night, _ = build_routine(premium_night_products, ROUTINE_STEPS_NIGHT, exclude_ids=used_premium)
-
-    return {
-        "best_match": {"morning": best_morning, "night": best_night},
-        "budget_picks": {"morning": budget_morning, "night": budget_night},
-        "premium": {"morning": premium_morning, "night": premium_night},
-    }
 
     # Generate LLM explanations for top 10 only
     top_products = diverse_products[:10]
