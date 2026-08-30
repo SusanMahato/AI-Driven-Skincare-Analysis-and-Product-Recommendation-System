@@ -66,8 +66,14 @@ def generate_skin_report(
     cv_scores: dict,
     skin_profile: dict,
     weather: dict,
-    ingredients: list
+    ingredients: list,
+    journal_summary: str | None = None
 ) -> str:
+    journal_section = (
+        f"\nLIFESTYLE CONTEXT (from user's journal):\n{journal_summary}\n"
+        if journal_summary else ""
+    )
+
     prompt = (
         "You are a professional skincare consultant. Write a personalized skin analysis report.\n\n"
         f"SKIN SCORES (0-1, higher = more severe):\n"
@@ -90,10 +96,12 @@ def generate_skin_report(
         f"- Humidity: {weather.get('humidity')}%\n"
         f"- Weather: {weather.get('weather_condition')}\n"
         f"- UV Index: {weather.get('uv_index')}\n\n"
-        f"RECOMMENDED INGREDIENTS: {', '.join(ingredients)}\n\n"
+        f"RECOMMENDED INGREDIENTS: {', '.join(ingredients)}\n"
+        f"{journal_section}\n"
         "Write in second person. No greetings, no sign-offs, no placeholders. "
         "Cover: what was detected, how weather affects skin, why each ingredient was chosen, "
-        "usage warnings, and realistic expectations. Maximum 200 words."
+        "usage warnings, and realistic expectations. If lifestyle context is provided, weave in "
+        "one relevant observation connecting it to the skin analysis. Maximum 220 words."
     )
 
     try:

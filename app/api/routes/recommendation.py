@@ -7,6 +7,7 @@ from app.core.dependencies import get_current_user
 from app.models.scan import Scan
 from app.models.user import User
 from app.services.quiz_service import get_skin_profile
+from app.services.journal_service import get_journal_summary_for_report
 from app.services.recommendation_service import (
     generate_skin_report,
     get_spf_recommendation,
@@ -78,8 +79,8 @@ def get_latest_recommendation(
     ingredient_names = list(dict.fromkeys(ingredient_names))  # dedupe, preserve order
 
     spf = get_spf_recommendation(scan.uv_index)
-    skin_report = generate_skin_report(cv_scores, skin_profile_dict, weather, ingredient_names)
-
+    journal_summary = get_journal_summary_for_report(db, current_user.id)
+    skin_report = generate_skin_report(cv_scores, skin_profile_dict, weather, ingredient_names, journal_summary)
     logger.info(f"Recommendation generated: user_id={current_user.id}, scan_id={scan.id}")
 
     return {

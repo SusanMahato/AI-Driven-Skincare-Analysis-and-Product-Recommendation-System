@@ -86,9 +86,17 @@ def test_analyze_skin_is_deterministic_for_the_same_image():
     assert first == second
 
 
-def test_analyze_skin_raises_on_unreadable_image():
-    """Unlike check_face_quality, analyze_skin has no internal try/except —
-    callers (the /scan/analyze route) are expected to run check_face_quality
-    and check_photo_quality first. Documenting that contract here."""
-    with pytest.raises(Exception):
-        cv_service.analyze_skin(b"not an image")
+def test_analyze_skin_returns_zero_scores_on_unreadable_image():
+    """analyze_skin catches internal errors (e.g. corrupt/unreadable images)
+    and returns a safe all-zero fallback rather than raising, so a single
+    bad upload can't crash the /scan/analyze route. check_face_quality and
+    check_photo_quality remain the primary gatekeepers for bad input."""
+    result = cv_service.analyze_skin(b"not an image")
+    assert result["acne_score"] == 0.0
+    assert result["dark_spots_score"] == 0.0
+    assert result["pores_score"] == 0.0
+    assert result["wrinkles_score"] == 0.0
+    assert result["redness_score"] == 0.0
+    assert result["dark_circles_score"] == 0.0
+    assert result["photo_confidence"] == 0.0
+    

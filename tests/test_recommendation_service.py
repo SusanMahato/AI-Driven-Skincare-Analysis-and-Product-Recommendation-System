@@ -110,7 +110,7 @@ def test_generate_skin_report_returns_llm_text():
         )
     assert report == "You have mild acne. Use salicylic acid."
     mock_create.assert_called_once()
-    assert mock_create.call_args.kwargs["model"] == "llama-3.3-70b-versatile"
+    assert mock_create.call_args.kwargs["model"] == "openai/gpt-oss-120b"
 
 
 # ---------------------------------------------------------------------------
