@@ -1,11 +1,11 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { analyzeScan } from '@/lib/api';
 import { isLoggedIn } from '@/lib/auth';
 import { Fraunces, IBM_Plex_Sans, IBM_Plex_Mono } from 'next/font/google';
-import { ArrowLeft, Camera, Loader2, ScanSearch, CloudSun, ArrowRight, X } from 'lucide-react';
+import { ArrowLeft, Camera, Loader2, ScanSearch, CloudSun, ArrowRight, X, Upload, RotateCcw } from 'lucide-react';
 
 const fraunces = Fraunces({
   subsets: ['latin'],
@@ -31,7 +31,7 @@ export default function ScanPage() {
   const [result, setResult] = useState<any>(null);
   const [error, setError] = useState('');
 
-  useEffect(() => {
+    useEffect(() => {
     if (typeof window !== 'undefined') {
       if (!isLoggedIn()) {
         router.push('/login');
@@ -39,7 +39,13 @@ export default function ScanPage() {
     }
   }, []);
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  useEffect(() => {
+    return () => {
+      streamRef.current?.getTracks().forEach((track) => track.stop());
+    };
+  }, []);
+
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selected = e.target.files?.[0];
     if (selected) {
       setFile(selected);
@@ -47,6 +53,54 @@ export default function ScanPage() {
       setResult(null);
       setError('');
     }
+  };
+
+  const [showCamera, setShowCamera] = useState(false);
+  const [cameraError, setCameraError] = useState('');
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const streamRef = useRef<MediaStream | null>(null);
+
+  const startCamera = async () => {
+    setCameraError('');
+    setShowCamera(true);
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: 'user' },
+      });
+      streamRef.current = stream;
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+      }
+    } catch (err) {
+      setCameraError('Could not access camera. Check your browser permissions and try again.');
+    }
+  };
+
+  const stopCamera = () => {
+    streamRef.current?.getTracks().forEach((track) => track.stop());
+    streamRef.current = null;
+    setShowCamera(false);
+    setCameraError('');
+  };
+
+  const capturePhoto = () => {
+    const video = videoRef.current;
+    if (!video) return;
+    const canvas = document.createElement('canvas');
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+    canvas.toBlob((blob) => {
+      if (!blob) return;
+      const captured = new File([blob], `scan-${Date.now()}.jpg`, { type: 'image/jpeg' });
+      setFile(captured);
+      setPreview(URL.createObjectURL(captured));
+      setResult(null);
+      setError('');
+      stopCamera();
+    }, 'image/jpeg', 0.92);
   };
 
   const handleScan = async () => {
@@ -115,34 +169,90 @@ export default function ScanPage() {
             Upload Photo
           </h2>
 
-          <label className="block cursor-pointer">
-            <div className="border-2 border-dashed border-[#20241F]/15 rounded-lg p-8 text-center hover:border-[#BD7B54]/50 transition">
-              {preview ? (
-                <img src={preview} alt="Preview" className="w-48 h-48 object-cover rounded-lg mx-auto" />
-              ) : (
-                <div>
-                  <Camera size={36} className="mx-auto mb-3 text-[#20241F]/25" strokeWidth={1.5} />
-                  <p className="text-sm font-medium text-[#20241F]/70">Click to upload photo</p>
-                  <p className="text-xs text-[#20241F]/40 mt-1">JPG, PNG or WEBP</p>
+                    {showCamera ? (
+            <div className="rounded-lg border border-[#20241F]/15 overflow-hidden bg-black">
+              {cameraError ? (
+                <div className="p-8 text-center">
+                  <p className="text-red-600 text-sm mb-3">{cameraError}</p>
+                  <button
+                    onClick={stopCamera}
+                    className="text-xs text-[#20241F]/60 hover:text-[#20241F] underline"
+                  >
+                    Close
+                  </button>
                 </div>
+              ) : (
+                <>
+                  <video
+                    ref={videoRef}
+                    autoPlay
+                    playsInline
+                    muted
+                    className="w-full h-72 object-cover"
+                  />
+                  <div className="flex items-center justify-center gap-3 bg-white p-4">
+                    <button
+                      onClick={stopCamera}
+                      className="flex items-center gap-1.5 rounded-md border border-[#20241F]/15 px-4 py-2 text-xs font-medium text-[#20241F]/70 hover:bg-[#20241F]/5 transition"
+                    >
+                      <X size={14} /> Cancel
+                    </button>
+                    <button
+                      onClick={capturePhoto}
+                      className="flex items-center gap-1.5 rounded-md bg-[#182019] px-5 py-2 text-xs font-medium text-[#F5F2EA] hover:bg-[#BD7B54] transition"
+                    >
+                      <Camera size={14} /> Capture
+                    </button>
+                  </div>
+                </>
               )}
             </div>
-            <input
-              type="file"
-              accept="image/*"
-              capture="user"
-              onChange={handleFileChange}
-              className="hidden"
-               />
-          </label>
+          ) : preview ? (
+            <div className="border-2 border-dashed border-[#20241F]/15 rounded-lg p-8 text-center">
+              <img src={preview} alt="Preview" className="w-48 h-48 object-cover rounded-lg mx-auto" />
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <label className="block cursor-pointer">
+                <div className="border-2 border-dashed border-[#20241F]/15 rounded-lg p-8 text-center hover:border-[#BD7B54]/50 transition h-full flex flex-col items-center justify-center">
+                  <Upload size={32} className="mx-auto mb-3 text-[#20241F]/25" strokeWidth={1.5} />
+                  <p className="text-sm font-medium text-[#20241F]/70">Upload from device</p>
+                  <p className="text-xs text-[#20241F]/40 mt-1">JPG, PNG or WEBP</p>
+                </div>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleFileChange}
+                  className="hidden"
+                />
+              </label>
 
-          {preview && (
-            <button
-              onClick={() => { setFile(null); setPreview(null); setResult(null); }}
-              className="mt-3 text-xs text-[#20241F]/40 hover:text-[#20241F]/70 transition cursor-pointer flex items-center gap-1"
-            >
-              <X size={12} /> Remove photo
-            </button>
+              <button
+                onClick={startCamera}
+                className="border-2 border-dashed border-[#20241F]/15 rounded-lg p-8 text-center hover:border-[#BD7B54]/50 transition flex flex-col items-center justify-center cursor-pointer"
+              >
+                <Camera size={32} className="mx-auto mb-3 text-[#20241F]/25" strokeWidth={1.5} />
+                <p className="text-sm font-medium text-[#20241F]/70">Take a photo</p>
+                <p className="text-xs text-[#20241F]/40 mt-1">Use your camera</p>
+              </button>
+            </div>
+          )}
+
+                    {preview && !showCamera && (
+            <div className="mt-3 flex items-center gap-4">
+              <button
+                onClick={() => { setFile(null); setPreview(null); setResult(null); }}
+                className="text-xs text-[#20241F]/40 hover:text-[#20241F]/70 transition cursor-pointer flex items-center gap-1"
+              >
+                <X size={12} /> Remove photo
+              </button>
+              <button
+                onClick={startCamera}
+                className="text-xs text-[#20241F]/40 hover:text-[#20241F]/70 transition cursor-pointer flex items-center gap-1"
+              >
+                <RotateCcw size={12} /> Retake with camera
+              </button>
+            </div>
           )}
 
           {error && (
