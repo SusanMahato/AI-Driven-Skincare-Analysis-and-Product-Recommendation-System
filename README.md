@@ -213,20 +213,44 @@ GOOGLE_CLIENT_SECRET=
 - [x] LLM-generated skin reports
 - [x] Scan history with photo storage and side-by-side comparison
 - [x] AI-assisted skin journal with rule-based insights
+- [x] Journal insights integrated into the AI-generated skin report — lifestyle averages (sleep, water intake, stress, exercise) and the strongest statistically-supported pattern are woven into the report when sufficient data exists, with no change in behaviour for users who don't use the journal
 - [x] Ingredient engine with conflict detection and AM/PM splitting
 - [x] Product recommendation engine — 1,631 products across 3 price tiers
 - [x] Frontend dashboard with Products, Progress, History, and Journal tabs
 - [x] Live USD/NPR exchange rate conversion
+- [x] Camera capture for scans — take a photo directly (mirrored preview and capture) in addition to uploading from device
+- [x] Production deployment — Render + Vercel + Neon + UptimeRobot
+- [x] ONNX Runtime migration for memory-efficient inference
+- [x] Security hardening — dependency audit, PyJWT migration
+
+## Roadmap
+
+**Done**
+- [x] Authentication — JWT, email verification, OTP reset, Google OAuth
+- [x] Skin quiz and profile management
+- [x] CV model — multi-label EfficientNet-B0 (F1: 0.672, ROC-AUC: 0.846)
+- [x] Weather/UV integration
+- [x] LLM-generated skin reports
+- [x] Scan history with photo storage and side-by-side comparison
+- [x] AI-assisted skin journal with rule-based insights
+- [x] Journal insights integrated into the AI-generated skin report — lifestyle averages (sleep, water intake, stress, exercise) and the strongest statistically-supported pattern are woven into the report when sufficient data exists, with no change in behaviour for users who don't use the journal
+- [x] Ingredient engine with conflict detection and AM/PM splitting
+- [x] Product recommendation engine — 1,631 products across 3 price tiers
+- [x] Frontend dashboard with Products, Progress, History, and Journal tabs
+- [x] Live USD/NPR exchange rate conversion
+- [x] Camera capture for scans — take a photo directly (mirrored preview and capture) in addition to uploading from device
 - [x] Production deployment — Render + Vercel + Neon + UptimeRobot
 - [x] ONNX Runtime migration for memory-efficient inference
 - [x] Security hardening — dependency audit, PyJWT migration
 
 **Considered, not pursued**
-- Facebook OAuth, Docker-based deployment, and scheduled reminder emails were evaluated but dropped in favour of the journal and scan comparison features above.
+- Facebook OAuth and scheduled reminder emails were evaluated but dropped in favour of the journal and scan comparison features above.
 
-**Next**
+**Next (ideas, not commitments — future work if the project continues)**
+- [ ] Docker-based deployment for the backend (and optionally frontend), for easier local setup and portability beyond Render
+- [ ] Export scan and journal history (PDF/CSV) for sharing with a dermatologist
+- [ ] Use journal insights to influence ingredient/product scoring, not just the written report text
 - [ ] Expert-annotated data to improve recall on pores and dark spots
-- [ ] Native mobile app
 
 ## License
 
