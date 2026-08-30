@@ -83,7 +83,7 @@ export default function ScanPage() {
     setCameraError('');
   };
 
-  const capturePhoto = () => {
+    const capturePhoto = () => {
     const video = videoRef.current;
     if (!video) return;
     const canvas = document.createElement('canvas');
@@ -91,6 +91,9 @@ export default function ScanPage() {
     canvas.height = video.videoHeight;
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
+    // Flip horizontally so the saved photo matches the mirrored preview
+    ctx.translate(canvas.width, 0);
+    ctx.scale(-1, 1);
     ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
     canvas.toBlob((blob) => {
       if (!blob) return;
@@ -183,12 +186,12 @@ export default function ScanPage() {
                 </div>
               ) : (
                 <>
-                  <video
+                                    <video
                     ref={videoRef}
                     autoPlay
                     playsInline
                     muted
-                    className="w-full h-72 object-cover"
+                    className="w-full h-72 object-cover scale-x-[-1]"
                   />
                   <div className="flex items-center justify-center gap-3 bg-white p-4">
                     <button
