@@ -239,6 +239,7 @@ GOOGLE_CLIENT_SECRET=
 - [x] Frontend dashboard with Products, Progress, History, and Journal tabs
 - [x] Live USD/NPR exchange rate conversion
 - [x] Camera capture for scans — take a photo directly (mirrored preview and capture) in addition to uploading from device
+- [x] Docker support for local development — `docker compose up --build` runs the backend against a disposable local Postgres, fully isolated from production
 - [x] Production deployment — Render + Vercel + Neon + UptimeRobot
 - [x] ONNX Runtime migration for memory-efficient inference
 - [x] Security hardening — dependency audit, PyJWT migration
@@ -247,7 +248,6 @@ GOOGLE_CLIENT_SECRET=
 - Facebook OAuth and scheduled reminder emails were evaluated but dropped in favour of the journal and scan comparison features above.
 
 **Next (ideas, not commitments — future work if the project continues)**
-- [ ] Docker-based deployment for the backend (and optionally frontend), for easier local setup and portability beyond Render
 - [ ] Export scan and journal history (PDF/CSV) for sharing with a dermatologist
 - [ ] Use journal insights to influence ingredient/product scoring, not just the written report text
 - [ ] Expert-annotated data to improve recall on pores and dark spots
