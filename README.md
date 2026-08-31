@@ -243,6 +243,7 @@ GOOGLE_CLIENT_SECRET=
 - [x] Production deployment — Render + Vercel + Neon + UptimeRobot
 - [x] ONNX Runtime migration for memory-efficient inference
 - [x] Security hardening — dependency audit, PyJWT migration
+- [x] Cleaned up stray Vercel deployment and stale Dependabot branches
 
 **Considered, not pursued**
 - Facebook OAuth and scheduled reminder emails were evaluated but dropped in favour of the journal and scan comparison features above.
